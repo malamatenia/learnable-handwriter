@@ -32,19 +32,21 @@ def collate_fn(inp, supervised=None, alias=None):
         x = to_tensor(x)
         ys.append(y)
         xs.append(x.unsqueeze(0))
-    return {'x': torch.cat(xs, dim=0), 'y': ys, 'supervised': supervised, 'cropped': True, 'alias': alias}
+    return {'x': torch.cat(xs, dim=0), 'supervised': supervised, 'cropped': True, 'alias': alias}
 
 def collate_fn_pad_to_max(batch, supervised=None, alias=None, pad_value=None, max_w=0):
-    xs, ys, ws = [], [], []
+    xs, ws = [], [], []
+    labels = defaultdict(list)
     for x, y in batch:
-        x = to_tensor(x) 
-        ys.append(y)
+        x = to_tensor(x)
         W = x.size()[-1]
         ws.append(W)
         max_w = max(W, max_w)
         xs.append(x)
+        for k, v in y.items():
+            labels[k].append(v)
     xs = torch.cat([pad_right(x, max_w, pad_value) for x in xs], dim=0)
-    return {'x': xs, 'y': ys, 'w': ws, 'supervised': supervised, 'cropped': False, 'alias': alias}
+    return {'x': xs, 'w': ws, 'supervised': supervised, 'cropped': False, 'alias': alias} | labels
 
 def pad_right_batch(batch, max_w):
     xs = []
@@ -63,21 +65,9 @@ def get_k(iterator, k):
             break
     return output, flag
 
-
-#ERR_FN = 'SQADADL-LTW.error'
-#ERR_LOCK = FileLock('./dataloader_worker.lock')
-
 def worker(args):
     i, dataset = args
     return dataset[i]
-
-#   except KeyboardInterrupt:
-#        pass
-#    except:
-#        print('[ERROR] exception caught in data loader worker, logged in:', ERR_FN)
-#        with ERR_LOCK:
-#            with open(ERR_FN, 'a') as f:
-#                f.write('-'*50 + '\n\n' + traceback.format_exc() + '\n')
 
 import multiprocessing as mp
 from itertools import chain

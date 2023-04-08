@@ -141,8 +141,14 @@ class LearnableTypewriter(nn.Module):
         composed = self.compositor(img, tsf_bkgs, all_tsf_layers, all_tsf_masks)
 
         output = {
-            'reconstruction': composed['cur_img'], 'tsf_layers': all_tsf_layers, 'tsf_masks': all_tsf_masks, 
-            'tsf_bkgs': tsf_bkgs, 'w': selection['w'], 'logits' : selection['logits'], 'log_probs': selection['log_probs']}
+            'reconstruction': composed['cur_img'],
+            'tsf_layers': all_tsf_layers,
+            'tsf_masks': all_tsf_masks, 
+            'tsf_bkgs': tsf_bkgs,
+            'w': selection['w'],
+            'logits' : selection['logits'],
+            'log_probs': selection['log_probs']
+        }
 
         if return_params:
             output['params'] = {'sprites': tsf_layers_params, 'background': tsf_bkgs_param}

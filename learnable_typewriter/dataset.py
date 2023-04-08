@@ -9,7 +9,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from learnable_typewriter.base import Base
-from learnable_typewriter.data.dataset import LineDataset, ExemplarDataset
+from learnable_typewriter.data.dataset import UniDataset
 from learnable_typewriter.data.dataloader import collate_fn, collate_fn_pad_to_max
 from learnable_typewriter.utils.defaults import DATASETS_PATH
 from learnable_typewriter.data.dataloader import SequentialAdaptiveDataLoader
@@ -107,27 +107,16 @@ class Dataset(Base):
     def __get_set_dataset_size__(self):
         dataset_size = []
         for dataloader in self.train_loader:
-            if isinstance(dataloader.dataset, LineDataset):
-                dataset_size.append(len(dataloader.dataset))
-
-        if len(dataset_size):
-            num_samples = int(np.mean(dataset_size))
-            for dataloader in self.train_loader:
-                if isinstance(dataloader.dataset, ExemplarDataset):
-                    dataloader.dataset.num_samples = num_samples
+            dataset_size.append(len(dataloader.dataset))
 
     @property
     def img_size(self):
         self.img_size = self.train_loader.dataset.img_size
 
     def get_dataset(self, dataset_args, split, dataset_size=None):
-        exemplar = dataset_args.pop('exemplar', False)
         has_transcribe = 'transcribe_dataset' in self.__dict__
         transcribe = (self.transcribe_dataset if has_transcribe else None)
-        if exemplar:
-            dataset = ExemplarDataset(split=split, height=self.height, transcribe=transcribe, **dataset_args)
-        else:
-            dataset = LineDataset(split=split, height=self.height, dataset_size=dataset_size, transcribe=transcribe, padding_value=self.pad_value, **dataset_args)
+        dataset = UniDataset(split=split, height=self.height, transcribe=transcribe, **dataset_args)
 
         if not has_transcribe:
             assert split == 'train'

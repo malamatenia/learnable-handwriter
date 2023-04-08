@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+
 class CTC(torch.nn.Module):
     def __init__(self, blank, zero_infinity=True, reduction='mean'):
         super().__init__()
@@ -57,12 +58,27 @@ class Loss(object):
     def supervised(self):
         return self.model.supervised
 
+    def l2_(self, pred, gt):
+        masked = False
+        if gt.size()[1] == 4:
+            mask = gt[:, -1]
+            gt = gt[:, :-1]
+            masked = True
+    
+        loss = self._l2(pred, gt)
+        if masked:
+            mask_ = mask.sum(dim=-1).sum(dim=-1)
+            mask_ = torch.where(mask > 0, torch.ones_like(mask), mask)
+            loss = (loss * mask)/mask_
+
+        return loss
+
     def l2(self, gt, pred):
         if gt['cropped']:
-            return self._l2(pred, gt['x']).mean()
+            return self.l2_(pred, gt['x']).mean()
         else:
             mask = self.get_mask_width(gt['x'], torch.tensor(gt['w']))
-            return (self._l2(pred, gt['x'])*mask).sum(-1).mean(2).mean() 
+            return (self.l2_(pred, gt['x'])*mask).sum(-1).mean(2).mean() 
 
     def get_mask_width(self, gt, widths):
         mask_widths = torch.zeros_like(gt)
@@ -91,7 +107,8 @@ class Loss(object):
     def sup_reg(self, loss, output, gt, pred):
         if self.reg_ctc(gt):
             n_cells = self.model.transform_layers_.size(-1)
-            transcriptions_padded, true_lengths = self.model.process_batch_transcriptions(gt['y'])
+            transcriptions_padded, true_lengths = self.model.process_batch_transcriptions(gt['base'])
+            # add gt['combined']
             true_widths_pos = self.model.true_width_pos(gt['x'], torch.Tensor(gt['w']), n_cells)
             ctc_loss = self.ctc_factor*self.ctc(pred['log_probs'], transcriptions_padded, true_widths_pos, true_lengths)
 
