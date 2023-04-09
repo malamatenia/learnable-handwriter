@@ -5,13 +5,13 @@ n_workers: 16
 
 optimizer:
   name: adamw
-  lr: 1.0e-4
+  lr: 1.0e-3
   weight_decay: 0
   encoder:
     weight_decay: 1.0e-6
 
 log:
-  milestone: 1
+  milestone: 10
   save:
     every: 1
     best: True

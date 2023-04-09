@@ -10,6 +10,7 @@ background:
     - ${model.encoder.H}
 
   use_clamp: soft
+
   init:
     freeze: True
     constant: 0.7
@@ -61,4 +62,4 @@ window:
 
 loss:
   sigma_gaussian: 7
-  ctc_factor: 0.01
+  ctc_factor: 0.1

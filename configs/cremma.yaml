@@ -1,7 +1,7 @@
 defaults:
   - training: defaults
   - model: defaults
-  - dataset: google
+  - dataset: cremma
   - _self_
 
 hydra:
@@ -10,22 +10,25 @@ hydra:
   output_subdir: null
   verbose: False
 
-tag: supervised
+tag: sbb-sup
 
 dataset:
-  google:
+  cremma:
     supervised: True
+    starts_with: 'SBB-PK'
 
 model:
+  encoder:
+    H: 64
+
   background:
     init:
-      constant: [0.7411764705882353,0.5568627450980392,0.3764705882352941]
-  loss:
-    ctc_factor: 0.1
+      constant: [0.6392156862745098, 0.6, 0.5019607843137255]
 
 training:
   n_workers: 8
   batch_size: 16
-  num_epochs: 100
+  num_epochs: 500
+
   optimizer:
     lr: 1.0e-3
