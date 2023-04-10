@@ -3,6 +3,7 @@ from shutil import copyfile
 from os.path import join
 from time import time
 from collections import defaultdict
+from tqdm import tqdm
 
 import torch
 from learnable_typewriter.utils.defaults import MODEL_FILE, BEST_MODEL

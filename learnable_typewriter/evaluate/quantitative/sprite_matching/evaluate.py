@@ -101,7 +101,7 @@ def er_evaluate_supervised(trainer, verbose=False, average=True, eval_train=True
             map_gt[-1] =  ('@' if '_' == loader.dataset.space else '_')
             labels = []
             for x in loader:
-                labels += list(zip(trainer.inference(x), x['y']))
+                labels += list(zip(trainer.inference(x), x['base']))
 
             output[(loader.dataset.alias, split)] = error_rate(labels, verbose=verbose, average=average, delim=loader.dataset.space, sep=loader.dataset.sep, map_pd=map_pd, map_gt=map_gt)
 

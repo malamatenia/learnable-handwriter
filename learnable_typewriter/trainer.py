@@ -1,6 +1,7 @@
 """Stage 1"""
 import torch
 from itertools import chain
+from tqdm import tqdm
 
 from learnable_typewriter.utils.generic import use_seed, alternate
 from learnable_typewriter.typewriter.optim.optimizer import get_optimizer

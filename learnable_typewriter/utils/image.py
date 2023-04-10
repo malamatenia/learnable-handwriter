@@ -52,3 +52,14 @@ def draw_border(img, color, width):
         a[:, k] = color
         a[:, -k-1] = color
     return Image.fromarray(a)
+
+def to_three(x):
+    if len(x.size()) == 3:
+        x = x.unsqueeze(1)
+
+    if x.size(1) == 1:
+        x = x.expand(-1, 3, -1, -1)
+    elif x.size(1) == 4:
+        x = x[:, :-1]
+
+    return x

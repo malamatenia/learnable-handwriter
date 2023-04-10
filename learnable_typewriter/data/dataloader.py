@@ -1,8 +1,7 @@
 import random
 import torch
-from torch.utils.data import DataLoader
 from torch.nn.functional import pad
-from functools import partial
+from collections import defaultdict
 
 def pad_right(x, max_w, pad_value=None):
     if pad_value is None:
@@ -16,7 +15,7 @@ def pad_right(x, max_w, pad_value=None):
     if max_w > w:
         c = x.size()[0]
         if c > 1 and isinstance(fill, (list, tuple)) and padding_mode == 'constant':
-            x = torch.cat([pad(x[i].unsqueeze(0), (0, max_w - w), value=fill[i], mode=padding_mode) for i in range(c)], dim=0)
+            x = torch.cat([pad(x[i].unsqueeze(0), (0, max_w - w), value=(fill[i] if c < 3 else 0), mode=padding_mode) for i in range(c)], dim=0)
         else:
             x = pad(x, (0, max_w - w), value=fill, mode=padding_mode)
 
@@ -35,7 +34,7 @@ def collate_fn(inp, supervised=None, alias=None):
     return {'x': torch.cat(xs, dim=0), 'supervised': supervised, 'cropped': True, 'alias': alias}
 
 def collate_fn_pad_to_max(batch, supervised=None, alias=None, pad_value=None, max_w=0):
-    xs, ws = [], [], []
+    xs, ws = [], []
     labels = defaultdict(list)
     for x, y in batch:
         x = to_tensor(x)

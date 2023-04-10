@@ -6,6 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from omegaconf import open_dict
 
+from learnable_typewriter.utils.image import to_three
+
 from learnable_typewriter.typewriter.typewriter.window import Window
 from learnable_typewriter.typewriter.typewriter.encoder import Encoder
 from learnable_typewriter.typewriter.typewriter.selection import Selection
@@ -123,6 +125,7 @@ class LearnableTypewriter(nn.Module):
     def predict_cell_per_cell(self, x, return_masks_frg=False, return_params=False):
         img = x['x'] = x['x'].to(self.device)
         B, C, H, W = img.size()
+        C = min(C, 3)
         features = self.encoder(img)
 
         tsf_layers_params, tsf_bkgs_param = self.predict_parameters(img, features)
@@ -138,7 +141,7 @@ class LearnableTypewriter(nn.Module):
 
         # transform sprites
         all_tsf_layers, all_tsf_masks = self.transform_sprites(selection['S'], tsf_layers_params)
-        composed = self.compositor(img, tsf_bkgs, all_tsf_layers, all_tsf_masks)
+        composed = self.compositor(to_three(img), tsf_bkgs, all_tsf_layers, all_tsf_masks)
 
         output = {
             'reconstruction': composed['cur_img'],

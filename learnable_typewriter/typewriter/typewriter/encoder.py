@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from torch import nn, zeros
 from torch.nn import functional as F
+from learnable_typewriter.utils.image import to_three
 from learnable_typewriter.typewriter.typewriter.mini_resnet import get_resnet_model
 
 DOWNSCALE_FACTOR = {'resnet32': 4, 'resnet20': 4, 'resnet14': 4, 'resnet8': 4, 'default': 5} 
@@ -66,6 +67,7 @@ class Encoder(nn.Module):
         return self.rnn(x)[0]
 
     def forward(self, x):
+        x = to_three(x)
         x = self.encoder(x)
         x = self.layer_norm(x.squeeze(2).permute(0, 2, 1))
         x = self.infer_rnn_(x).permute(0, 2, 1)

@@ -25,10 +25,14 @@ model:
     init:
       constant: [0.6392156862745098, 0.6, 0.5019607843137255]
 
+  loss:
+    ctc_factor: 0.1
+
 training:
   n_workers: 8
   batch_size: 16
   num_epochs: 500
-
   optimizer:
     lr: 1.0e-3
+
+# python train.py sbb-pk.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=sbb-sup-0.1

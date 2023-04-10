@@ -7,7 +7,7 @@ import torch
 from torchvision.utils import make_grid
 from learnable_typewriter.model import Model
 from learnable_typewriter.utils.generic import nonce, cfg_flatten
-from learnable_typewriter.utils.image import img
+from learnable_typewriter.utils.image import img, to_three
 from torch.utils.tensorboard import SummaryWriter
 import tensorboard.compat.proto.event_pb2 as event_pb2
 import struct
@@ -48,30 +48,7 @@ class Logger(Model):
             self.keep_steps = []
 
     def __close_tensorboard__(self):
-        # log_file = self.tensorboard.file_writer
         self.tensorboard.close()
-
-        # def read(data):
-        #     header = struct.unpack('Q', data[:8])            
-        #     event_str = data[12:12+int(header[0])] # 8+4
-        #     data = data[12+int(header[0])+4:]
-        #     return data, event_str
-
-        # with open(log_file, 'rb') as f:
-        #     data = f.read()
-
-        # while data:
-        #     data, event_str = read(data)
-        #     event = event_pb2.Event()
-
-        #     event.ParseFromString(event_str)
-        #     if event.HasField('summary'):
-        #         for value in event.summary.value:
-        #             if value.HasField('image'):
-        #                 img = value.image
-
-        # os.remove(log_file)
-
 
     def get_metrics(self, split):
         return getattr(self, f'{split}_metrics')
@@ -130,7 +107,7 @@ class Logger(Model):
         if len(x.shape) == 2:
             x = np.repeat(x[:, :, None], 3, axis=2)
 
-        self.tensorboard.add_image(name, x, dataformats='HWC', **kargs)
+        self.tensorboard.add_image(name, x, global_step=self.cur_iter, dataformats='HWC', **kargs)
 
     @torch.no_grad()
     def save_prototypes(self, header):
@@ -146,7 +123,7 @@ class Logger(Model):
                 decompose = self.decompositor
                 obj = decompose(images_to_tsf)
                 reco, seg = obj['reconstruction'].cpu(), obj['segmentation'].cpu()
-                transformed_imgs = torch.cat([images_to_tsf['x'].cpu().unsqueeze(0), reco.unsqueeze(0), seg.unsqueeze(0)], dim=0)
+                transformed_imgs = torch.cat([to_three(images_to_tsf['x']).cpu().unsqueeze(0), reco.unsqueeze(0), seg.unsqueeze(0)], dim=0)
                 transformed_imgs = torch.flatten(transformed_imgs, start_dim=0, end_dim=1)
                 self.save_image_grid(transformed_imgs, f'{header}/examples/{mode}/{alias}', nrow=images_to_tsf['x'].size()[0])
 

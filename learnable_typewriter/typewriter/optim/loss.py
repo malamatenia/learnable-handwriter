@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-
+from learnable_typewriter.utils.image import to_three
 
 class CTC(torch.nn.Module):
     def __init__(self, blank, zero_infinity=True, reduction='mean'):
@@ -60,25 +60,29 @@ class Loss(object):
 
     def l2_(self, pred, gt):
         masked = False
-        if gt.size()[1] == 4:
-            mask = gt[:, -1]
+        if gt.size(1) == 4:
+            mask = gt[:, -1].unsqueeze(1)
             gt = gt[:, :-1]
             masked = True
-    
+
+        elif len(gt.size()) == 3:
+            gt = gt.unsqueeze(1)
+
         loss = self._l2(pred, gt)
         if masked:
-            mask_ = mask.sum(dim=-1).sum(dim=-1)
-            mask_ = torch.where(mask > 0, torch.ones_like(mask), mask)
-            loss = (loss * mask)/mask_
+            #mask_ = mask.sum(dim=-1).sum(dim=-1).sum(dim=-1)
+            #mask_ = torch.where(mask > 0, torch.ones_like(mask), mask)
+            loss = (loss * mask) #/mask_
 
-        return loss
+        return gt,loss
 
     def l2(self, gt, pred):
         if gt['cropped']:
-            return self.l2_(pred, gt['x']).mean()
+            return self.l2_(pred, gt['x'])[1].mean()
         else:
-            mask = self.get_mask_width(gt['x'], torch.tensor(gt['w']))
-            return (self.l2_(pred, gt['x'])*mask).sum(-1).mean(2).mean() 
+            x, loss = self.l2_(pred, gt['x'])
+            mask = self.get_mask_width(x, torch.tensor(gt['w']))
+            return (loss*mask).sum(-1).mean(2).mean() 
 
     def get_mask_width(self, gt, widths):
         mask_widths = torch.zeros_like(gt)

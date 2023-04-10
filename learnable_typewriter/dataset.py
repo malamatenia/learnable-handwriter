@@ -102,12 +102,12 @@ class Dataset(Base):
             raise NotImplementedError('Partially unlabeled datasets are not yet correctly implemented')
         self.has_labels = all(self.has_labels)
 
-        self.__get_set_dataset_size__()
-
-    def __get_set_dataset_size__(self):
+    @property
+    def train_size(self):
         dataset_size = []
         for dataloader in self.train_loader:
-            dataset_size.append(len(dataloader.dataset))
+            dataset_size.append(len(dataloader))
+        return sum(dataset_size)
 
     @property
     def img_size(self):

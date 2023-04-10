@@ -1,4 +1,5 @@
 import torch
+from learnable_typewriter.utils.image import to_three
 import seaborn as sns
 import colorcet as cc
 
@@ -28,7 +29,7 @@ class Decompositor(object):
 
         for p in range(n_cells):
             H, W_predicted = tsf_layers[p].size(-2), tsf_layers[p].size(-1)
-            colors_p = colors[selection[:,:,p].argmax(0)].unsqueeze(-1).unsqueeze(-1)  #size (N,3,1,1)
+            colors_p = colors.to(selection.device)[selection[:,:,p].argmax(0)].unsqueeze(-1).unsqueeze(-1)  #size (N,3,1,1)
             layers_colored = colors_p.expand(colors_p.size(0),*tsf_layers[p][0].size())  #size (N,3,H,W_predicted)
             tsf_layers_colored.append(layers_colored)
 
@@ -51,8 +52,8 @@ class Decompositor(object):
             else:
                 selection = y['selection']  #size (K,N,n_cells)
                 
-            tsf_layers_colored = self.expand_colors_layers(tsf_layers, selection)
-            r = (x['x'], y['tsf_bkgs'], tsf_layers_colored, y['tsf_masks'])
+            tsf_layers_colored = self.expand_colors_layers(tsf_layers, selection.to())
+            r = (to_three(x['x']), y['tsf_bkgs'], tsf_layers_colored, y['tsf_masks'])
             y['segmentation'] = self.model.compositor(*r)['cur_img']
 
             self.model.prototypes.data.copy_(proto)
