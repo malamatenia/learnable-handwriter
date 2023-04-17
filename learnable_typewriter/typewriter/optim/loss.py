@@ -112,7 +112,6 @@ class Loss(object):
         if self.reg_ctc(gt):
             n_cells = self.model.transform_layers_.size(-1)
             transcriptions_padded, true_lengths = self.model.process_batch_transcriptions(gt['base'])
-            # add gt['combined']
             true_widths_pos = self.model.true_width_pos(gt['x'], torch.Tensor(gt['w']), n_cells)
             ctc_loss = self.ctc_factor*self.ctc(pred['log_probs'], transcriptions_padded, true_widths_pos, true_lengths)
 

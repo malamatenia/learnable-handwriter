@@ -7,6 +7,38 @@ from learnable_typewriter.typewriter.typewriter.mini_resnet import get_resnet_mo
 
 DOWNSCALE_FACTOR = {'resnet32': 4, 'resnet20': 4, 'resnet14': 4, 'resnet8': 4, 'default': 5} 
 
+def create_positional_encoding(max_len, d_model):
+    # same size with input matrix (for adding with input matrix)
+    encoding = torch.zeros(max_len, d_model) #sprites per position x dimensions 
+    encoding.requires_grad = False  # we don't need to compute gradient
+
+    pos = torch.arange(0, max_len)
+    pos = pos.float().unsqueeze(dim=1)
+    # 1D => 2D unsqueeze to represent word's position
+
+    _2i = torch.arange(0, d_model, step=2).float()
+    # 'i' means index of d_model (e.g. embedding size = 50, 'i' = [0,50])
+    # "step=2" means 'i' multiplied with two (same with 2 * i)
+
+    encoding[:, 0::2] = torch.sin(pos / (10000 ** (_2i / d_model)))
+    encoding[:, 1::2] = torch.cos(pos / (10000 ** (_2i / d_model)))
+    return encoding
+
+class Multi(nn.Module):
+    def __init__(self, d_model, L, nhead=8, num_encoder_layers=1, num_decoder_layers=1):
+        super().__init__()
+        self.L = L
+        self.register_buffer('encoding', create_positional_encoding(self.L, d_model))
+        self.transformer_model = nn.Transformer(nhead=nhead, num_encoder_layers=num_encoder_layers, num_decoder_layers=num_decoder_layers, d_model=d_model, dim_feedforward=d_model*4, batch_first=True)
+        self.register_buffer('tgt_mask', torch.tril(torch.ones(self.L, self.L)))
+    
+    def forward(self, x):
+        b, p, d = x.size()
+        tgt = self.encoding.unsqueeze(0).expand(b * p, -1, -1)
+        src = x.view(b * p, 1, d)
+        x = self.transformer_model(src, tgt, tgt_mask=self.tgt_mask)
+        return x.reshape(b, p, self.L, d)
+    
 
 def gaussian_kernel(size, sigma=1, dtype=torch.float):
     # Create Gaussian Kernel. In Numpy
@@ -30,6 +62,7 @@ class GaussianPool(nn.Module):
         kernel = self.kernel.expand(x.size()[1], -1, -1, -1)
         return F.conv2d(x, weight=kernel, stride=self.stride, padding=0, groups=x.size()[1])
 
+
 class Encoder(nn.Module):
     def __init__(self, cfg):
         super().__init__()
@@ -49,26 +82,17 @@ class Encoder(nn.Module):
         self.out_ch = self.encoder(zeros(1, 3, self.H, 2*self.H)).size()[1]
         self.layer_norm = nn.LayerNorm(self.out_ch, elementwise_affine=False)
 
-        rnn_cfg = cfg.get('rnn', {})
-        if len(rnn_cfg):
-          type = rnn_cfg.get('type', 'gru')
-          assert type in {'gru', 'lstm'}
-          rnn_model = (nn.GRU if type == 'gru' else nn.LSTM)
-          dropout, bias = rnn_cfg.get('dropout', 0), rnn_cfg.get('bias', True)
-          bidirectional = rnn_cfg.get('bidirectional', True)
-          self.rnn = rnn_model(self.out_ch, self.out_ch, rnn_cfg.get('num_layers', 3), bidirectional=bidirectional, dropout=dropout, batch_first=True, bias=bias)
-          if bidirectional:
-              self.out_ch = 2*self.out_ch
-          self.infer_rnn_= self.infer_rnn
+        self.L = cfg.get('L', 1)
+        if self.L > 1:
+            self.multi = Multi(self.out_ch, self.L, **cfg.get('transformer', dict()))
         else:
-          self.infer_rnn_ = nn.Identity()
+            self.multi = nn.Identity()
 
-    def infer_rnn(self, x):
-        return self.rnn(x)[0]
-
-    def forward(self, x):
+    def forward(self, x): #we pass from 4D to 3D and we permute the order as to have Batch size, P(positions), d(features)
         x = to_three(x)
         x = self.encoder(x)
-        x = self.layer_norm(x.squeeze(2).permute(0, 2, 1))
-        x = self.infer_rnn_(x).permute(0, 2, 1)
-        return x
+        x = bkg = self.layer_norm(x.squeeze(2).permute(0, 2, 1))
+        x = x.unsqueeze(1) 
+        x = self.multi(x)
+        x = x.flatten(start_dim=1, end_dim=3).permute(0, 2, 1)
+        return {'sprites': x, 'background': bkg.permute(0, 2, 1)} 

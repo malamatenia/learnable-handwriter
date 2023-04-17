@@ -91,21 +91,14 @@ class LearnableTypewriter(nn.Module):
         return y
 
     def predict_parameters(self, x, features):
-        B, _, H, W = x.size()
-        n_cells = features.size(-1)
-        tsf_layers_params, tsf_bkgs_param = None, None
-
-        # BKg transformation
+        tsf_bkgs_param = None
         if self.background:
-            tsf_bkgs_param = torch.sigmoid(self.background_transformation.predict_parameters(x, features).permute(1, 2, 0, 3))
-        
-        layer_features = features.unsqueeze(1).reshape(B, -1, n_cells)
-        tsf_layers_params = self.layer_transformation.predict_parameters(x, layer_features)
-        tsf_layers_params = tsf_layers_params.reshape(1, B, -1, n_cells)
+            tsf_bkgs_param = torch.sigmoid(self.background_transformation.predict_parameters(x, features['background']).permute(1, 2, 0, 3))
 
+        tsf_layers_params = self.layer_transformation.predict_parameters(x, features['sprites']).unsqueeze(0)
         return tsf_layers_params, tsf_bkgs_param
 
-    def transform_background(self, backgrounds, color, size, device):
+    def transform_background(self, color, size):
         beta = self.beta_bkg.expand(size[0], -1, -1)
         grid = F.affine_grid(beta, size, align_corners=False)
         out = F.grid_sample(color, grid, mode='bilinear', padding_mode='border', align_corners=False)[0]
@@ -133,11 +126,10 @@ class LearnableTypewriter(nn.Module):
 
         # transform backgrounds
         if self.background:
-            backgrounds = self.background.backgrounds.unsqueeze(0).expand(B, C, -1, -1).unsqueeze(0)
-            tsf_bkgs = self.transform_background(backgrounds, tsf_bkgs_param, (B, C, H, W), self.device)
+            tsf_bkgs = self.transform_background(tsf_bkgs_param, (B, C, H, W), self.device)
 
         # select which sprites to place
-        selection = self.selection(features, self.sprites)
+        selection = self.selection(features['sprites'], self.sprites)
 
         # transform sprites
         all_tsf_layers, all_tsf_masks = self.transform_sprites(selection['S'], tsf_layers_params)
@@ -173,6 +165,7 @@ class LearnableTypewriter(nn.Module):
 
         tsf_sprites, tsf_masks = [], []
         for p in range(n_cells):
+            #TODO!!!!!Given encoder.L merge sprites for L * p 
             tsf_layers_params_p = tsf_layers_params[0, :, :, p]
             tsf = self.transform_sprites_p(sprites[p], tsf_layers_params_p)
 

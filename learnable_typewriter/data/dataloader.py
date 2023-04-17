@@ -34,18 +34,16 @@ def collate_fn(inp, supervised=None, alias=None):
     return {'x': torch.cat(xs, dim=0), 'supervised': supervised, 'cropped': True, 'alias': alias}
 
 def collate_fn_pad_to_max(batch, supervised=None, alias=None, pad_value=None, max_w=0):
-    xs, ws = [], []
-    labels = defaultdict(list)
+    xs, ws, labels = [], [], []
     for x, y in batch:
         x = to_tensor(x)
-        W = x.size()[-1]
+        W = x.size(-1)
         ws.append(W)
         max_w = max(W, max_w)
         xs.append(x)
-        for k, v in y.items():
-            labels[k].append(v)
+        labels.append(y)
     xs = torch.cat([pad_right(x, max_w, pad_value) for x in xs], dim=0)
-    return {'x': xs, 'w': ws, 'supervised': supervised, 'cropped': False, 'alias': alias} | labels
+    return {'x': xs, 'w': ws, 'base': labels, 'supervised': supervised, 'cropped': False, 'alias': alias}
 
 def pad_right_batch(batch, max_w):
     xs = []

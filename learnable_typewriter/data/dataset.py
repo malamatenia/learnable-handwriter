@@ -11,32 +11,17 @@ from dataclasses import dataclass
 
 
 def group_unicode_chars(text):
-    combining, base = [], []
-    current_char = {'combining': None, 'base': None}
+    output = []
 
     for c in unicodedata.normalize('NFD', text):
-        if unicodedata.category(c) in ['Mn', 'Mc', 'Lm']:
-            if current_char['base'] is None:
-                current_char['base'] = ' '
-            if current_char['combining'] is None:
-                current_char['combining'] = c
-        else:
-            if current_char['base'] is not None:
-                combining.append(current_char['combining'])
-                base.append(current_char['base'])
-            current_char = {'combining': None, 'base': c}
+        output.append(c)
 
-    if current_char['base'] is not None:
-        combining.append(current_char['combining'])
-        base.append(current_char['base'])
-
-    assert all(b is not None for b in base)
-    return combining, base
+    return output
 
 
 @dataclass
-class UniDataset(Dataset):
-    alias: str
+class UniDataset(Dataset): #inherits the torch Class 
+    alias: str #these lines serve as __init__ thanks to @dataclass
     path: str
     height: str
     split: str
@@ -72,58 +57,29 @@ class UniDataset(Dataset):
     def split_combining_(self, v):
         label = self.process_transcription(v['label'])
         if self.split_combining:
-            combining, base = group_unicode_chars(unicodedata.normalize('NFD', label))
-            return {'combining': combining, 'base': base}
+            return [c for c in unicodedata.normalize('NFD', label)]
         else:
-            return {'base': unicodedata.normalize('NFC', label)}
+            return [c for c in unicodedata.normalize('NFC', label)] #search why there is inconsistency in identifying combining characters 
 
     def make_alphabet(self):
         if self.transcribe is not None:
-            if self.split_combining:
-                self.alphabet = {k: set(v) for k, v in self.transcribe.items()}
-            else:
-                self.alphabet = set(self.transcribe.values())
+            self.alphabet = set(self.transcribe.values())
         else:
-            def get_set(k):
-                return set(l for _, d, _ in self.data for sentence in d[k] for l in sentence)
-
-            if self.split_combining:
-                self.alphabet = {k: get_set(k) for k in ['base', 'combining']}
-            else:
-                self.alphabet = get_set('base')
+            self.alphabet = set(l for _, sentence , _ in self.data for l in sentence)
 
     def transcribe_post_init(self):
-        if self.split_combining:
-            if self.transcribe is None:
-                self.transcribe = {k: dict(enumerate(sorted(v))) for k, v in self.alphabet.items()}
+        if self.transcribe is None:
+            self.transcribe = dict(enumerate(sorted(self.alphabet))) #dictionary with keys as int and values as sorted chars
 
-            self.matching = {k: {num: char for num, char in v.items()} for k, v in self.transcribe.items()}
-        else:
-            if self.transcribe is None:
-                self.transcribe = dict(enumerate(sorted(self.alphabet)))
-
-            self.matching = {char: num for num, char in self.transcribe.items()}
+        self.matching = {char: num for num, char in self.transcribe.items()} #puts chars in keys and num in index
 
     def get_path(self,path):
          for d in self.image_dirs:
             if path.startswith(d):
                 return join(self.path, 'images', d, path)
 
-    def split_it(self,):
+    def split_it(self,): #choses split and converts path into absolute path for the directory concerned
         self.data = [(self.get_path(path), label) for (path, label, split) in self.data if split == self.split]
-
-    def to_unicode_base(self, x):
-        return [self.matching[b] for b in x['base']]
-
-    def to_unicode_combining(self, x):
-        output = []
-        for b, c in zip(x['base'], x['combining']):
-            if c is not None:
-                c = self.matching['base'][b] + self.matching['combining'][c]
-            else:
-                c = self.matching['base'][b]
-            output.append(c)
-        return output
 
     def padding_post_init(self,):
         if self.padding_value is not None:
@@ -141,21 +97,18 @@ class UniDataset(Dataset):
             transform.append(RandomCrop((self.height, self.crop_width), pad_if_needed=True, fill=self.padding_value, padding_mode='constant'))
         self.transform = Compose(transform)
 
-    def __len__(self):
+    def __len__(self): #mandatory 
         return len(self.data)
 
     def convert_label(self, vs):
-        if self.split_combining:
-            return {k: [self.matching[l] for l in v[k]] for k, v in vs.items()}
-        else:
-            return {'base': [self.matching[v] for v in vs['base']]}
+        return [self.matching[v] for v in vs] #gets every character from the NFC and converts it to integers
 
-    def __getitem__(self, i):
+    def __getitem__(self, i): #mandatory/realises the indexing of the Class instance so we can iterate through
         path, label = self.data[i]
         x = Image.open(path).convert(self.channels)
-        x = x.resize((int(self.height * x.size[0] / x.size[1]), self.height))
+        x = x.resize((int(self.height * x.size[0] / x.size[1]), self.height)) #keeps constant aspect ratio
         x = self.transform(x)
-        return x, self.convert_label(label)
+        return x, self.convert_label(label) #function that gets the label and applies transformation (returns a tuple)
 
     @property
     def has_labels(self):
