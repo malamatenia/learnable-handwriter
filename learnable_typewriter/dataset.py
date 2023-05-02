@@ -95,6 +95,7 @@ class Dataset(Base):
         
         if self.supervised:
             self.log('Number of sprites : {}'.format(len(self.transcribe)))
+            print(self.transcribe)
 
         self.val_flag = (sum(len(v.dataset) for v in self.val_loader) > 0 or sum(len(v.dataset) for v in self.test_loader) > 0) and self.cfg["training"].get("evaluate", {}).get("active", True)
         self.has_labels = [getattr(self.train_loader[i].dataset, 'has_labels', True) for i in range(len(self.train_loader))]

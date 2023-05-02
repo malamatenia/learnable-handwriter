@@ -1,7 +1,7 @@
 import random
 from torch import zeros
 
-class LayeredCompositor(object):
+class LayeredCompositor(object): #takes in a set of layers, masks, and background and combines them to produce a final image
     def __init__(self, model):
         self.model = model
         self.window = model.window
@@ -49,7 +49,7 @@ class LayeredCompositor(object):
 
     def update(self, p):
         # update at position p with selection
-        local = self.get_local(p)
+        local = self.get_local(p%(self.n_cells//self.model.encoder.L))
         ws, we = local['bounds']
         self.cur_mask[p, :, :, :, ws:we] = local['mask']
         self.cur_foreground[p, :, :, :, ws:we] = local['layer']
@@ -58,11 +58,15 @@ class LayeredCompositor(object):
         self.set(*input)
         self.init()
 
-        order = list(range(self.n_cells))
-        for p in order:
+        for p in range(self.n_cells):
             self.update(p)
+        
+        P = self.n_cells//self.model.encoder.L
+        order = list(range(P))
         if self.model.training:
             random.shuffle(order)
+
+        order = [i*P+j for j in order for i in range(self.model.encoder.L)]
 
         self.cur_img = self.cur_img + self.background
         for p in order:

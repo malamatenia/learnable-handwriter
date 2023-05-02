@@ -4,9 +4,13 @@ import torch
 from itertools import groupby
 from scipy.ndimage import binary_opening
 
-def best_path(s):
+def best_path(s, L):
     selection = s['selection']
-    return torch.argmax(selection, dim=0)
+    x = torch.argmax(selection, dim=0)
+    if L > 1:
+        B, P = x.size()
+        x = x.reshape(B, P//L, L).permute(0, 2, 1).reshape(B, P)
+    return x
 
 def cer_aggregate(x, k, aggregate, factor):
     if factor == 1 and aggregate:
@@ -14,20 +18,20 @@ def cer_aggregate(x, k, aggregate, factor):
 
     x = x.tolist()
     if factor > 1:
-        x = [(e//factor if e != k else e) for e in x]
+        x = [(e//factor if e not in k else e) for e in x]
         if aggregate:
             x = [e for e, _ in groupby(x)]
 
-    return [e for e in x if e != k]
+    return [e for e in x if e not in k]
 
 def inference(model, x, xp=None, aggregate=True):
     if xp is None:
         xp = model.selection_head(x)
 
-    widths, n_cells, k = torch.tensor(x['w']), xp['selection'].size()[-1], xp['selection'].size()[0]-1
+    widths, n_cells, k = torch.tensor(x['w']), xp['selection'].size()[-1], set(xp['selection'].size()[0]-1 + l for l in range(model.encoder.L))
     true_widths_pos = model.true_width_pos(x['x'], widths, n_cells)
 
-    xp = best_path(xp)
+    xp = best_path(xp, model.encoder.L)
     xp = [cer_aggregate(xp[i][:true_widths_pos[i]], k, aggregate=aggregate, factor=model.sprites.per_character) for i in range(xp.size()[0])]
 
     return xp

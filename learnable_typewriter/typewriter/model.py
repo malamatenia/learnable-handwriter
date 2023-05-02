@@ -41,7 +41,7 @@ class LearnableTypewriter(nn.Module):
         self.window = Window(self.encoder, self.cfg['window'])
         self.sprites = Sprites(self.cfg['sprites'], logger)
         self.background = Background(self.cfg['background'])
-        self.selection = Selection(self.encoder.out_ch, self.sprites.masks_.latent_dim, self.sprites.per_character, logger)
+        self.selection = Selection(self.encoder.out_ch, self.sprites.masks_.latent_dim, self.sprites.per_character, logger, num_layers=self.encoder.L)
         if self.background:
             self.background_transformation = Transformation(self, 1, self.cfg['transformation']['background'], background=True)
             self.register_buffer('beta_bkg', torch.cat([torch.eye(2, 2), torch.zeros((2, 1))], dim=-1).unsqueeze(0))
@@ -95,7 +95,7 @@ class LearnableTypewriter(nn.Module):
         if self.background:
             tsf_bkgs_param = torch.sigmoid(self.background_transformation.predict_parameters(x, features['background']).permute(1, 2, 0, 3))
 
-        tsf_layers_params = self.layer_transformation.predict_parameters(x, features['sprites']).unsqueeze(0)
+        tsf_layers_params = self.layer_transformation.predict_parameters(x, features['sprites']).squeeze(0)
         return tsf_layers_params, tsf_bkgs_param
 
     def transform_background(self, color, size):
@@ -112,35 +112,35 @@ class LearnableTypewriter(nn.Module):
         tsf_sprites_p = self.layer_transformation.apply_parameters(sprites_p.unsqueeze(0), params_layers_p.unsqueeze(0))
         tsf_sprites_p = tsf_sprites_p.view(B, -1, self.encoder.H, self.window.w)
 
-        tsf_layers, tsf_masks = torch.split(tsf_sprites_p, [self.encoder.C, 1], dim=1)
+        tsf_layers, tsf_masks = torch.split(tsf_sprites_p, [self.encoder.C, 1], dim=1) #The torch.split function takes as its second argument a list of integers that specifies the size of each output tensor along the given dimension. In this case, the list [self.encoder.C, 1] specifies that tsf_layers should have C channels and tsf_masks should have a single channel.
         return tsf_layers, tsf_masks
     
-    def predict_cell_per_cell(self, x, return_masks_frg=False, return_params=False):
-        img = x['x'] = x['x'].to(self.device)
-        B, C, H, W = img.size()
-        C = min(C, 3)
+    def predict_cell_per_cell(self, x, return_masks_frg=False, return_params=False): #The method predict_cell_per_cell takes an input image and applies the learned transformation to each "cell" of the image separately, allowing the model to learn spatial transformations that can be applied locally to specific regions of the input.
+        img = x['x'] = x['x'].to(self.device) #The input image is first passed through an encoder to extract features
+        B, C, H, W = img.size() #save BCHW in variables
+        C = min(C, 3) 
         features = self.encoder(img)
 
-        tsf_layers_params, tsf_bkgs_param = self.predict_parameters(img, features)
+        tsf_layers_params, tsf_bkgs_param = self.predict_parameters(img, features) #predicts transformation parameters for the input image and its background 
         self.transform_layers_ = tsf_layers_params
 
         # transform backgrounds
         if self.background:
-            tsf_bkgs = self.transform_background(tsf_bkgs_param, (B, C, H, W), self.device)
+            tsf_bkgs = self.transform_background(tsf_bkgs_param, (B, C, H, W)) #If the background flag is set to True, the background of the input image is transformed using the predicted background parameters.
 
         # select which sprites to place
-        selection = self.selection(features['sprites'], self.sprites)
+        selection = self.selection(features['sprites'], self.sprites) # selects which sprites to place
 
         # transform sprites
-        all_tsf_layers, all_tsf_masks = self.transform_sprites(selection['S'], tsf_layers_params)
-        composed = self.compositor(to_three(img), tsf_bkgs, all_tsf_layers, all_tsf_masks)
+        all_tsf_layers, all_tsf_masks = self.transform_sprites(selection['S'], tsf_layers_params) # transformed using the predicted transformation parameters
+        composed = self.compositor(to_three(img), tsf_bkgs, all_tsf_layers, all_tsf_masks) #compose the transformed sprites and background onto the input image
 
         output = {
             'reconstruction': composed['cur_img'],
             'tsf_layers': all_tsf_layers,
             'tsf_masks': all_tsf_masks, 
             'tsf_bkgs': tsf_bkgs,
-            'w': selection['w'],
+            'probs': selection['probs'],
             'logits' : selection['logits'],
             'log_probs': selection['log_probs']
         }
@@ -161,12 +161,11 @@ class LearnableTypewriter(nn.Module):
         pass
 
     def transform_sprites(self, sprites, tsf_layers_params):
-        n_cells = tsf_layers_params.size(-1)
+        n_cells = tsf_layers_params.size(-1) #an integer representing the size of the tsf_layers_params tensor along its last dimension = features or representations
 
         tsf_sprites, tsf_masks = [], []
         for p in range(n_cells):
-            #TODO!!!!!Given encoder.L merge sprites for L * p 
-            tsf_layers_params_p = tsf_layers_params[0, :, :, p]
+            tsf_layers_params_p = tsf_layers_params[:, :, p] # For each cell index p, tsf_layers_params_p is defined as a slice of tsf_layers_params along the last dimension
             tsf = self.transform_sprites_p(sprites[p], tsf_layers_params_p)
 
             tsf_sprites.append(tsf[0])
@@ -243,9 +242,9 @@ class LearnableTypewriter(nn.Module):
     @torch.no_grad()
     def true_width_pos(self, x, widths, n_cells):
         '''Outputs for each instance its true length in terms of positions'''
-        w_max = x.size(-1)
-        widths_gt_pos = torch.full(size=(len(x),), fill_value=n_cells)
-        available_instances = torch.ones(len(x), dtype=torch.bool)
+        B, _, _, w_max = x.size()
+        widths_gt_pos = torch.full(size=(B,), fill_value=n_cells)
+        available_instances = torch.ones(B, dtype=torch.bool)
 
         for p in range(n_cells):
             ws = self.window.global_index(p, w_max)[0]
@@ -258,4 +257,4 @@ class LearnableTypewriter(nn.Module):
     def selection_head(self, x):
         img = x['x'] = x['x'].to(self.device)
         features = self.encoder(img)
-        return self.selection(features, self.sprites)
+        return self.selection(features['sprites'], self.sprites)

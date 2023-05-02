@@ -9,8 +9,35 @@ from learnable_typewriter.model import Model
 from learnable_typewriter.utils.generic import nonce, cfg_flatten
 from learnable_typewriter.utils.image import img, to_three
 from torch.utils.tensorboard import SummaryWriter
-import tensorboard.compat.proto.event_pb2 as event_pb2
-import struct
+import cv2
+from PIL import ImageFont, ImageDraw, Image
+from os.path import dirname, join
+FONT = join(dirname(dirname(__file__)), '.media', 'Junicode.ttf')
+
+def get_size(text, font):
+    image = Image.new('RGB', (500, 500), color = (255, 255, 255))
+    draw = ImageDraw.Draw(image)
+    return draw.textsize(text, font=font)
+
+
+def text_over_image(image: np.ndarray, text: str, text_color=0):
+    h, w = image.shape
+
+    font = ImageFont.truetype(FONT, size=24)
+    textsize = get_size('A', font)
+    offset = 2*textsize[1]
+    img = np.zeros((h + offset, w), dtype=np.uint8)
+
+    pil_image = Image.fromarray(img)
+    draw = ImageDraw.Draw(pil_image)
+
+    textsize = get_size(text, font)
+    text_x, text_y = (w - textsize[0]) // 2, (offset - textsize[1])//2
+    draw.text((text_x, text_y), text, font=font, fill=255)
+    img = np.array(pil_image)
+    
+    img[offset:] = (image*255).astype(np.uint8)
+    return img/255.0
 
 class Logger(Model):
     """Pipeline to train a NN model using a certain dataset, both specified by an YML config."""
@@ -110,8 +137,10 @@ class Logger(Model):
         self.tensorboard.add_image(name, x, global_step=self.cur_iter, dataformats='HWC', **kargs)
 
     @torch.no_grad()
-    def save_prototypes(self, header):
-        masks = self.model.sprites.masks
+    def save_prototypes(self, header): # 00:10 twerk is the new tsifteteli
+        masks = self.model.sprites.masks.cpu().numpy()
+        if self.supervised:
+            masks = torch.stack([torch.from_numpy(text_over_image(masks[i].squeeze(0), self.transcribe[i])).unsqueeze(0) for i in range(masks.shape[0])], dim=0)
         self.save_image_grid(masks, f'{header}/masks', nrow=5)
 
     @torch.no_grad()

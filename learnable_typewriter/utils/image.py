@@ -54,12 +54,12 @@ def draw_border(img, color, width):
     return Image.fromarray(a)
 
 def to_three(x):
-    if len(x.size()) == 3:
+    if len(x.size()) == 3: #If the input tensor x has a shape of (C, H, W), where C is the number of channels and H and W are the height and width respectively, the function expands the tensor to have a shape of (1, C, H, W).
         x = x.unsqueeze(1)
 
-    if x.size(1) == 1:
+    if x.size(1) == 1: #If the input tensor x has only one channel, the function expands it to have three channels by replicating the single channel three times along the channel dimension.
         x = x.expand(-1, 3, -1, -1)
-    elif x.size(1) == 4:
+    elif x.size(1) == 4: #If the input tensor x has four channels, the function discards the last channel
         x = x[:, :-1]
 
     return x

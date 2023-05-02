@@ -29,7 +29,7 @@ def error_rate(data, delim, sep, map_gt=None, map_pd=None, verbose=False, averag
     i = 0
     for (pd, gt) in data:
         if map_gt is not None:
-            gt = [map_gt[g] for g in gt]
+            gt = [map_gt[g] for g in gt if g in map_gt]
         if map_pd is not None:
             pd = [map_pd.get(p, '_') for p in pd if p != -1]  
 

@@ -10,14 +10,6 @@ import unicodedata
 from dataclasses import dataclass
 
 
-def group_unicode_chars(text):
-    output = []
-
-    for c in unicodedata.normalize('NFD', text):
-        output.append(c)
-
-    return output
-
 
 @dataclass
 class UniDataset(Dataset): #inherits the torch Class 
@@ -100,8 +92,19 @@ class UniDataset(Dataset): #inherits the torch Class
     def __len__(self): #mandatory 
         return len(self.data)
 
+    def is_combining(self, v):
+        return unicodedata.category(v) in ['Mn', 'Lm']
+
     def convert_label(self, vs):
-        return [self.matching[v] for v in vs] #gets every character from the NFC and converts it to integers
+        if self.split_combining:
+            output = []
+            for i, v in enumerate(vs):
+                output.append(self.matching[v])
+                if i + 1 < len(vs) and not self.is_combining(vs[i+1]):
+                    output.append(len(self.transcribe))
+            return output
+        else:
+            return [self.matching[v] for v in vs] #gets every character from the NFC and converts it to integers
 
     def __getitem__(self, i): #mandatory/realises the indexing of the Class instance so we can iterate through
         path, label = self.data[i]

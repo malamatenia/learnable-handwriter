@@ -25,7 +25,7 @@ class Decompositor(object):
     def expand_colors_layers(self, tsf_layers, selection):
         n_cells = len (tsf_layers)
         tsf_layers_colored = list()
-        colors = torch.cat([torch.Tensor(self.colors), torch.zeros((1,3))], dim = 0)
+        colors = torch.cat([torch.Tensor(self.colors), torch.zeros((self.model.encoder.L,3))], dim = 0)
 
         for p in range(n_cells):
             H, W_predicted = tsf_layers[p].size(-2), tsf_layers[p].size(-1)
