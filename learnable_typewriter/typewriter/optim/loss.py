@@ -111,15 +111,9 @@ class Loss(object):
     def sup_reg(self, loss, output, gt, pred):
         if self.reg_ctc(gt):
             transcriptions_padded, true_lengths = self.model.process_batch_transcriptions(gt['base'])
-            n_cells = self.model.transform_layers_.size(-1)//self.model.encoder.L
+            n_cells = self.model.transform_layers_.size(-1)
             true_widths_pos = self.model.true_width_pos(gt['x'], torch.Tensor(gt['w']), n_cells)
             log_probs = pred['log_probs']
-            L = self.model.encoder.L
-            if L > 1:
-                N, B, K  = log_probs.size()
-                log_probs = log_probs.reshape(N//L, L, B, K)
-                log_probs = log_probs.permute(1, 0, 2, 3).contiguous()
-                log_probs = log_probs.reshape(N, B, K)
             ctc_loss = self.ctc_factor*self.ctc(log_probs, transcriptions_padded, true_widths_pos, true_lengths)
             output['ctc_loss'] = ctc_loss.detach().item()
             loss = loss + ctc_loss
@@ -138,15 +132,3 @@ class Loss(object):
         loss = self.unsup_reg(loss, output, gt, pred)
         output['total'] = loss
         return output
-
-
-# neg_inf = (torch.min(log_probs).item()-1) * torch.ones((L, N//L, B, L-1), device=log_probs.device)
-# log_probs = torch.cat((log_probs, neg_inf), dim=-1)
-
-# for l in reversed(range(0, L-1)):
-#     lp, kp = l, K + L - 2 - l
-#     # print(f'Placing {kp}<-{K-1} at {lp} --- blank', self.ctc.blank)
-#     log_probs[lp, ..., kp] = log_probs[lp, ..., K-1]
-#     log_probs[lp, ..., K - 1] = -float('inf')
-
-# log_probs = log_probs.reshape(N, B, K + L - 1)

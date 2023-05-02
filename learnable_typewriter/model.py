@@ -29,7 +29,7 @@ class Model(Dataset):
         self.inference = (InferenceUnsupervised if self.unsupervised else InferenceSupervised)(self.model)
 
     def __init_model__(self):
-        self.model = LearnableTypewriter(self.cfg['model'], self.transcribe, logger=self.log).to(self.device)
+        self.model = LearnableTypewriter(self.cfg['model'], self.transcribe, self.train_loader.dataset.factoring, logger=self.log).to(self.device)
         self.log(f'model initialized with {count_parameters(self.model)} trainable parameters')
         self.log(f'window with step of {self.model.window.w_step} and width {self.model.window.w}')
 

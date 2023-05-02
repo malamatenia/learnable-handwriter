@@ -25,7 +25,6 @@ class UniDataset(Dataset): #inherits the torch Class
     sep: str = ''
     space: str = ' '
     starts_with: str = None
-    split_combining: bool = False
     supervised: bool = False
     padding: Union[int, tuple] = None
     padding_value: Union[int, tuple] = None
@@ -48,10 +47,18 @@ class UniDataset(Dataset): #inherits the torch Class
 
     def split_combining_(self, v):
         label = self.process_transcription(v['label'])
-        if self.split_combining:
-            return [c for c in unicodedata.normalize('NFD', label)]
-        else:
-            return [c for c in unicodedata.normalize('NFC', label)] #search why there is inconsistency in identifying combining characters 
+        return [c for c in unicodedata.normalize('NFC', label)] #search why there is inconsistency in identifying combining characters 
+
+    @property
+    def factoring(self,):
+        mapping = {a: list(unicodedata.normalize('NFD', a)) for a in self.alphabet}
+        unique_combining = set(v for v in mapping.values())
+        indexes = {c: i for i, c in enumerate(sorted(unique_combining))}
+        mapping = np.zeros((len(self.alphabet), len(unique_combining)))
+        for k, vs in mapping.items():
+            for v in vs:
+                mapping[self.matching[k], indexes[v]] = 1
+        return mapping
 
     def make_alphabet(self):
         if self.transcribe is not None:
@@ -96,15 +103,7 @@ class UniDataset(Dataset): #inherits the torch Class
         return unicodedata.category(v) in ['Mn', 'Lm']
 
     def convert_label(self, vs):
-        if self.split_combining:
-            output = []
-            for i, v in enumerate(vs):
-                output.append(self.matching[v])
-                if i + 1 < len(vs) and not self.is_combining(vs[i+1]):
-                    output.append(len(self.transcribe))
-            return output
-        else:
-            return [self.matching[v] for v in vs] #gets every character from the NFC and converts it to integers
+        return [self.matching[v] for v in vs] #gets every character from the NFC and converts it to integers
 
     def __getitem__(self, i): #mandatory/realises the indexing of the Class instance so we can iterate through
         path, label = self.data[i]

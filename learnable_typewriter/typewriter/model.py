@@ -23,12 +23,15 @@ delta = lambda x: None
 
 
 class LearnableTypewriter(nn.Module):
-    def __init__(self, cfg, transcribe, logger=delta):
+    def __init__(self, cfg, transcribe, factoring=None, logger=delta):
         super().__init__()
 
         if transcribe is not None:
             with open_dict(cfg):
-                cfg.sprites.n = len(transcribe)
+                if factoring is not None:
+                    cfg.sprites.n = factoring.shape[-1]
+                else:
+                    cfg.sprites.n = len(transcribe)
         
         self.cfg = cfg
         self.log = logger
@@ -41,7 +44,7 @@ class LearnableTypewriter(nn.Module):
         self.window = Window(self.encoder, self.cfg['window'])
         self.sprites = Sprites(self.cfg['sprites'], logger)
         self.background = Background(self.cfg['background'])
-        self.selection = Selection(self.encoder.out_ch, self.sprites.masks_.latent_dim, self.sprites.per_character, logger, num_layers=self.encoder.L)
+        self.selection = Selection(self.encoder.out_ch, self.sprites.masks_.latent_dim, self.sprites.per_character, factoring, logger)
         if self.background:
             self.background_transformation = Transformation(self, 1, self.cfg['transformation']['background'], background=True)
             self.register_buffer('beta_bkg', torch.cat([torch.eye(2, 2), torch.zeros((2, 1))], dim=-1).unsqueeze(0))
@@ -93,9 +96,9 @@ class LearnableTypewriter(nn.Module):
     def predict_parameters(self, x, features):
         tsf_bkgs_param = None
         if self.background:
-            tsf_bkgs_param = torch.sigmoid(self.background_transformation.predict_parameters(x, features['background']).permute(1, 2, 0, 3))
+            tsf_bkgs_param = torch.sigmoid(self.background_transformation.predict_parameters(x, features).permute(1, 2, 0, 3))
 
-        tsf_layers_params = self.layer_transformation.predict_parameters(x, features['sprites']).squeeze(0)
+        tsf_layers_params = self.layer_transformation.predict_parameters(x, features).squeeze(0)
         return tsf_layers_params, tsf_bkgs_param
 
     def transform_background(self, color, size):
@@ -129,7 +132,7 @@ class LearnableTypewriter(nn.Module):
             tsf_bkgs = self.transform_background(tsf_bkgs_param, (B, C, H, W)) #If the background flag is set to True, the background of the input image is transformed using the predicted background parameters.
 
         # select which sprites to place
-        selection = self.selection(features['sprites'], self.sprites) # selects which sprites to place
+        selection = self.selection(features, self.sprites) # selects which sprites to place
 
         # transform sprites
         all_tsf_layers, all_tsf_masks = self.transform_sprites(selection['S'], tsf_layers_params) # transformed using the predicted transformation parameters
@@ -257,4 +260,4 @@ class LearnableTypewriter(nn.Module):
     def selection_head(self, x):
         img = x['x'] = x['x'].to(self.device)
         features = self.encoder(img)
-        return self.selection(features['sprites'], self.sprites)
+        return self.selection(features, self.sprites)

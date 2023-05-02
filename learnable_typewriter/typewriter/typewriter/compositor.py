@@ -49,7 +49,7 @@ class LayeredCompositor(object): #takes in a set of layers, masks, and backgroun
 
     def update(self, p):
         # update at position p with selection
-        local = self.get_local(p%(self.n_cells//self.model.encoder.L))
+        local = self.get_local(p)
         ws, we = local['bounds']
         self.cur_mask[p, :, :, :, ws:we] = local['mask']
         self.cur_foreground[p, :, :, :, ws:we] = local['layer']
@@ -61,12 +61,9 @@ class LayeredCompositor(object): #takes in a set of layers, masks, and backgroun
         for p in range(self.n_cells):
             self.update(p)
         
-        P = self.n_cells//self.model.encoder.L
-        order = list(range(P))
+        order = list(range(self.n_cells))
         if self.model.training:
             random.shuffle(order)
-
-        order = [i*P+j for j in order for i in range(self.model.encoder.L)]
 
         self.cur_img = self.cur_img + self.background
         for p in order:
