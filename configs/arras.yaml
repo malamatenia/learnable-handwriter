@@ -19,7 +19,7 @@ dataset:
 
 model:
   encoder:
-    H: 64
+    H: 96
 
   background:
     init:
@@ -33,4 +33,4 @@ training:
   batch_size: 16
   num_epochs: 500
   optimizer:
-    lr: 1.0e-3
+    lr: 1.0e-4

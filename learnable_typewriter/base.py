@@ -31,6 +31,12 @@ class Base(object):
     def make_timestamp(self):
         return datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
+    def replace_run_dir_(self, new_dir):
+        assert self.eval
+        timestamp = self.cfg['timestamp']
+        path = join(new_dir, self.dataset_alias, self.cfg["tag"], timestamp)
+        self.run_dir = mkdir(path)
+
     def run_dir_(self):
         if 'run_dir' in self.cfg:
             return self.cfg['run_dir']

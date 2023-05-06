@@ -16,6 +16,7 @@ from omegaconf import DictConfig
 class nonce(object):
     def __getattr__(self, _):
         return self.nop
+
     def nop(*args, **kw):
         pass
 

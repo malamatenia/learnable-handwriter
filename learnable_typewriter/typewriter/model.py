@@ -26,17 +26,26 @@ class LearnableTypewriter(nn.Module):
     def __init__(self, cfg, transcribe, factoring=None, logger=delta):
         super().__init__()
 
+        if factoring is None:
+            self.factoring, self.sprite_char = None, transcribe
+        else:
+            self.factoring, self.sprite_char = factoring
+
         if transcribe is not None:
             with open_dict(cfg):
                 if factoring is not None:
-                    cfg.sprites.n = factoring.shape[-1]
+                    cfg.sprites.n = self.factoring.shape[-1]
+                    self.blank = self.factoring.shape[0]
                 else:
                     cfg.sprites.n = len(transcribe)
+                    self.blank = len(transcribe)
+        else:
+            self.blank = cfg.sprites.n
         
         self.cfg = cfg
         self.log = logger
         self.transcribe = transcribe
-        
+
         self.canvas_size = cfg['transformation']['canvas_size']
         self.log(f'canvas_size = {self.canvas_size}')
 
@@ -44,7 +53,7 @@ class LearnableTypewriter(nn.Module):
         self.window = Window(self.encoder, self.cfg['window'])
         self.sprites = Sprites(self.cfg['sprites'], logger)
         self.background = Background(self.cfg['background'])
-        self.selection = Selection(self.encoder.out_ch, self.sprites.masks_.latent_dim, self.sprites.per_character, factoring, logger)
+        self.selection = Selection(self.encoder.out_ch, self.sprites.masks_.latent_dim, self.sprites.per_character, self.factoring, logger)
         if self.background:
             self.background_transformation = Transformation(self, 1, self.cfg['transformation']['background'], background=True)
             self.register_buffer('beta_bkg', torch.cat([torch.eye(2, 2), torch.zeros((2, 1))], dim=-1).unsqueeze(0))
@@ -118,7 +127,7 @@ class LearnableTypewriter(nn.Module):
         tsf_layers, tsf_masks = torch.split(tsf_sprites_p, [self.encoder.C, 1], dim=1) #The torch.split function takes as its second argument a list of integers that specifies the size of each output tensor along the given dimension. In this case, the list [self.encoder.C, 1] specifies that tsf_layers should have C channels and tsf_masks should have a single channel.
         return tsf_layers, tsf_masks
     
-    def predict_cell_per_cell(self, x, return_masks_frg=False, return_params=False): #The method predict_cell_per_cell takes an input image and applies the learned transformation to each "cell" of the image separately, allowing the model to learn spatial transformations that can be applied locally to specific regions of the input.
+    def predict_cell_per_cell(self, x, return_masks_frg=False, return_params=False, align=False): #The method predict_cell_per_cell takes an input image and applies the learned transformation to each "cell" of the image separately, allowing the model to learn spatial transformations that can be applied locally to specific regions of the input.
         img = x['x'] = x['x'].to(self.device) #The input image is first passed through an encoder to extract features
         B, C, H, W = img.size() #save BCHW in variables
         C = min(C, 3) 
@@ -132,7 +141,10 @@ class LearnableTypewriter(nn.Module):
             tsf_bkgs = self.transform_background(tsf_bkgs_param, (B, C, H, W)) #If the background flag is set to True, the background of the input image is transformed using the predicted background parameters.
 
         # select which sprites to place
-        selection = self.selection(features, self.sprites) # selects which sprites to place
+        if align:
+            selection = self.selection(features, self.sprites, gt_align=x, model=self) # selects which sprites to place
+        else:
+            selection = self.selection(features, self.sprites, model=self) # selects which sprites to place
 
         # transform sprites
         all_tsf_layers, all_tsf_masks = self.transform_sprites(selection['S'], tsf_layers_params) # transformed using the predicted transformation parameters

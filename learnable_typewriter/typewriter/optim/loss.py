@@ -17,7 +17,7 @@ class Loss(object):
         self._l2 = nn.MSELoss(reduction='none')
         self.ctc_factor = cfg['ctc_factor']
         if self.ctc_factor > 0:
-            self.ctc = CTC(blank=model.sprites.n_sprites + model.encoder.L - 1)
+            self.ctc = CTC(blank=model.blank)
         self.__exp_unsup_regularizers_init__(cfg)
 
     def __exp_unsup_regularizers_init__(self, cfg):

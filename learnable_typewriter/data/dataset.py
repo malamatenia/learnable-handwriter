@@ -8,7 +8,7 @@ from torchvision.transforms import Compose, RandomCrop
 
 import unicodedata
 from dataclasses import dataclass
-
+import numpy as np
 
 
 @dataclass
@@ -52,13 +52,13 @@ class UniDataset(Dataset): #inherits the torch Class
     @property
     def factoring(self,):
         mapping = {a: list(unicodedata.normalize('NFD', a)) for a in self.alphabet}
-        unique_combining = set(v for v in mapping.values())
-        indexes = {c: i for i, c in enumerate(sorted(unique_combining))}
-        mapping = np.zeros((len(self.alphabet), len(unique_combining)))
+        unique_combining = list(sorted(set(v for vs in mapping.values() for v in vs)))
+        indexes = {c: i for i, c in enumerate(unique_combining)}
+        factoring = np.zeros((len(self.alphabet), len(unique_combining)))
         for k, vs in mapping.items():
             for v in vs:
-                mapping[self.matching[k], indexes[v]] = 1
-        return mapping
+                factoring[self.matching[k], indexes[v]] = 1
+        return factoring, unique_combining
 
     def make_alphabet(self):
         if self.transcribe is not None:

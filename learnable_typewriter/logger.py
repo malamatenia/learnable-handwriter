@@ -62,8 +62,8 @@ class Logger(Model):
                 data, alias = next(iter(dl)), self.dataset_kwargs[i]['alias']
                 self.images_to_tsf[data['supervised']].append((alias, data))
 
-    def __init_tensorboard__(self):
-        if self.eval:
+    def __init_tensorboard__(self, force=False):
+        if self.eval and not force:
             self.cfg_flat = None
             self.tensorboard = nonce()
         else:
@@ -140,7 +140,7 @@ class Logger(Model):
     def save_prototypes(self, header): # 00:10 twerk is the new tsifteteli
         masks = self.model.sprites.masks.cpu().numpy()
         if self.supervised:
-            masks = torch.stack([torch.from_numpy(text_over_image(masks[i].squeeze(0), self.transcribe[i])).unsqueeze(0) for i in range(masks.shape[0])], dim=0)
+            masks = torch.stack([torch.from_numpy(text_over_image(masks[i].squeeze(0), self.model.sprite_char[i])).unsqueeze(0) for i in range(masks.shape[0])], dim=0)
         self.save_image_grid(masks, f'{header}/masks', nrow=5)
 
     @torch.no_grad()
@@ -152,7 +152,17 @@ class Logger(Model):
                 decompose = self.decompositor
                 obj = decompose(images_to_tsf)
                 reco, seg = obj['reconstruction'].cpu(), obj['segmentation'].cpu()
-                transformed_imgs = torch.cat([to_three(images_to_tsf['x']).cpu().unsqueeze(0), reco.unsqueeze(0), seg.unsqueeze(0)], dim=0)
+                
+                obj_al = decompose(images_to_tsf, align=True) # maybe flag that on a future version
+                reco_al, seg_al = obj_al['reconstruction'].cpu(), obj_al['segmentation'].cpu()
+                
+                transformed_imgs = torch.cat([
+                    to_three(images_to_tsf['x']).cpu().unsqueeze(0),
+                    reco.unsqueeze(0),
+                    seg.unsqueeze(0),
+                    reco_al.unsqueeze(0),
+                    seg_al.unsqueeze(0),
+                ], dim=0)
                 transformed_imgs = torch.flatten(transformed_imgs, start_dim=0, end_dim=1)
                 self.save_image_grid(transformed_imgs, f'{header}/examples/{mode}/{alias}', nrow=images_to_tsf['x'].size()[0])
 

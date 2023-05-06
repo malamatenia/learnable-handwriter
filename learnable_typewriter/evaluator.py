@@ -9,6 +9,7 @@ from learnable_typewriter.evaluate.quantitative.metrics import Metrics, AverageM
 from learnable_typewriter.evaluate.quantitative.sprite_matching.evaluate import er_evaluate_unsupervised, er_evaluate_supervised, metrics_to_average_sub
 from learnable_typewriter.evaluate.qualitative.decompositor import Decompositor
 from learnable_typewriter.logger import Logger
+from learnable_typewriter.utils.generic import nonce
 
 
 class Evaluator(Logger):
@@ -65,7 +66,7 @@ class Evaluator(Logger):
                         self.cer_loss_val_.append(v)
 
     def log_er_texts(self, metadata, mapping, max_lines=10):
-        if self.eval:
+        if isinstance(self.tensorboard, nonce):
             return
 
         for (alias, split), metrics in metadata.items():

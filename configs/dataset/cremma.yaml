@@ -2,4 +2,3 @@ cremma:
   path: cremma/
   sep: ''
   space: ' '
-  split_combining: False
