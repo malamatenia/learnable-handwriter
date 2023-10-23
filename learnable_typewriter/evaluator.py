@@ -1,6 +1,7 @@
 from itertools import chain
 from collections import defaultdict
 
+import wandb
 import pandas as pd
 import numpy as np
 import torch
@@ -57,27 +58,35 @@ class Evaluator(Logger):
         self.log(f'computing error-rate')
         self.cer_loss_val_ = []
         tid = ('best-model:' if self.eval_best_mode else '')
+        logs = {}
         for (alias, split), metrics in average.items():
             for k, v in metrics.items():
                 if k in {'cer', 'wer', 'ser'}:
-                    self.tensorboard.add_scalar(f'metrics/{alias}/{k}/{split}/', v, self.cur_iter)
+                    logs[f'metrics/{alias}/{k}/{split}/'] = v
                     self.log(f'{tid}[{alias}/{split}] {k}:{v}', eval=True)
                     if k == 'cer' and split == 'val':
                         self.cer_loss_val_.append(v)
 
+        wandb.log(logs, step=self.cur_iter)
+
     def log_er_texts(self, metadata, mapping, max_lines=10):
-        if isinstance(self.tensorboard, nonce):
+        if isinstance(self.wandb, nonce):
             return
 
+        tables = {}
         for (alias, split), metrics in metadata.items():
             pred, gt = metrics['texts'], metrics['gt']
             pred, gt = pred[:max_lines], gt[:max_lines]
-            for i, (p, g) in enumerate(zip(pred, gt)):
-                if self.eval_best_mode:
-                    self.tensorboard.add_text(f'{alias}/{split}/{i}/pred{self.eval_best_str}', f'`{p}`', self.cur_iter)
-                else:
-                    self.tensorboard.add_text(f'{alias}/{split}/{i}/pred+gt', '  \n'.join([f'`{p}`', f'`{g}`']), self.cur_iter)
-        self.tensorboard.add_text(f'{alias}/{split}/mapping', str(mapping), self.cur_iter)
+            table = wandb.Table(columns=["Pred", "Ground Truth"])
+            for (p, g) in zip(pred, gt):
+                table.add_data(p, g)
+            tables[f'{alias}/{split}/' + ('best' if self.eval_best_mode else 'normal')] = table
+
+        k, vs = list(zip(*mapping.items()))
+        tables['mapping'] = wandb.Table(columns=list(k))
+        for v in vs:
+            tables['mapping'].add_data(v)
+        wandb.log(tables, step=self.cur_iter)
 
     def log_er_last(self, average):
         self.log_er(average)
@@ -91,7 +100,7 @@ class Evaluator(Logger):
                     self.log(f'{k}: {v}', eval=True)
 
         if not self.eval:
-            self.tensorboard.add_hparams(self.cfg_flat, metric_dict)
+            wandb.log(metric_dict, step=self.cur_iter, step=self.cur_iter)
 
     @property
     def cer_loss_val(self):

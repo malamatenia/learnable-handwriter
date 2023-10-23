@@ -8,8 +8,8 @@ from torchvision.utils import make_grid
 from learnable_typewriter.model import Model
 from learnable_typewriter.utils.generic import nonce, cfg_flatten
 from learnable_typewriter.utils.image import img, to_three
-from torch.utils.tensorboard import SummaryWriter
-import cv2
+import wandb
+
 from PIL import ImageFont, ImageDraw, Image
 from os.path import dirname, join
 FONT = join(dirname(dirname(__file__)), '.media', 'Junicode.ttf')
@@ -43,7 +43,7 @@ class Logger(Model):
     """Pipeline to train a NN model using a certain dataset, both specified by an YML config."""
     def __init__(self, cfg):
         super().__init__(cfg)
-        self.__init_tensorboard__()
+        self.__init_wandb__()
         if not self.post_load_flag:
             self.__post_init_logger__()
 
@@ -52,30 +52,32 @@ class Logger(Model):
 
     def __init_sample_images__(self):
         self.images_to_tsf, self.num_tsf = {True: [], False: []}, self.log_cfg['train']['images']['how_many']
-        splits = ['train'] #+ (['val'] if self.val_flag else []) #we changed that from +test to +val because we split the dataset to train+val without test 18/10
+        splits = ['train'] + (['val'] if self.val_flag else []) #we changed that from +test to +val because we split the dataset to train+val without test 18/10
 
         for split in splits:
             for i, dl in enumerate(self.get_dataloader(split=split, batch_size=self.num_tsf, dataset_size=self.num_tsf, remove_crop=True)):
                 if self.dataset_kwargs[i].get('split', split) != split:
                     continue
-
+                
                 data, alias = next(iter(dl)), self.dataset_kwargs[i]['alias']
                 self.images_to_tsf[data['supervised']].append((alias, data))
 
-    def __init_tensorboard__(self, force=False):
+    def __init_wandb__(self, force=False):
         if self.eval and not force:
             self.cfg_flat = None
-            self.tensorboard = nonce()
+            self.wandb = nonce()
         else:
-            tensorboard = self.cfg["training"].get("tensorboard", 'tensorboard')
-            log_dir = f"{self.run_dir}/{tensorboard}"
-
-            self.tensorboard = SummaryWriter(log_dir=log_dir)
+            self.wandb = wandb.init(
+                # Set the project where this run will be logged
+                project=os.path.split(self.run_dir),
+                # Track hyperparameters and run metadata
+                config=self.config
+            )
             self.cfg_flat = cfg_flatten(self.cfg)
             self.keep_steps = []
 
-    def __close_tensorboard__(self):
-        self.tensorboard.close()
+    def __close_wandb__(self):
+        self.wandb.finished()
 
     def get_metrics(self, split):
         return getattr(self, f'{split}_metrics')
@@ -111,17 +113,17 @@ class Logger(Model):
         if self.supervised:
             self.eval_reco('val')
             self.log_step('val')
-            self.log_tensorboard('val')
+            self.log_wandb('val')
         self.eval_reco('test')
         self.log_step('test')
-        self.log_tensorboard('test')
+        self.log_wandb('test')
 
     def log_train_metrics(self):
         if self.train_end:
             self.reset_metrics_train()
             self.eval_reco('train')
         self.log_step('train')
-        self.log_tensorboard('train')
+        self.log_wandb('train')
 
     @torch.no_grad()
     def log_images(self, header='latest'):
@@ -134,7 +136,7 @@ class Logger(Model):
         if len(x.shape) == 2:
             x = np.repeat(x[:, :, None], 3, axis=2)
 
-        self.tensorboard.add_image(name, x, global_step=self.cur_iter, dataformats='HWC', **kargs)
+        wandb.log({"images": wandb.Image(x, caption=name)}, step=self.cur_iter)
 
     @torch.no_grad()
     def save_prototypes(self, header): # 00:10 twerk is the new tsifteteli
@@ -176,17 +178,12 @@ class Logger(Model):
     def reco_loss_train(self):
         return np.mean([v['reco_loss'].avg for v in self.train_metrics.values()])
 
-    def log_tensorboard(self, split):
+    def log_wandb(self, split):
+        logs = {}
         for k, metrics in self.metrics_[split].items():
-            losses = list(filter(lambda s: 'loss' in s, metrics.names))
-            for l in losses:
-                self.tensorboard.add_scalar(f'loss/{k}/{l}/{split}', metrics[l].avg, self.cur_iter)
+            for t, tn in zip(['loss', 'reco', 'time/img'], ['loss', 'reco', 'time-per-img']):
+                losses = list(filter(lambda s: t in s, metrics.names))
+                for l in losses:
+                    logs[f'{tn}/{k}/{l}/{split}'] = metrics[l].avg
 
-            losses = list(filter(lambda s: s.startswith('reco'), metrics.names))
-            for l in losses:
-                self.tensorboard.add_scalar(f'reco/{k}/{l}/{split}', metrics[l].avg, self.cur_iter)
-
-            losses = list(filter(lambda s: s.startswith('time/img'), metrics.names))
-            for l in losses:
-                self.tensorboard.add_scalar(f'time-per-img/{k}/{l}/{split}', metrics[l].avg, self.cur_iter)
-
+        wandb.log(logs, step=self.cur_iter)

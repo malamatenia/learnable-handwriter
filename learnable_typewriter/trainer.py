@@ -182,8 +182,8 @@ class Trainer(Evaluator):
         self.train_end = True
         self.call_it_a_day()
         self.compute_metrics(msg=message)
-        if 'tensorboard' in self.__dict__ and self.tensorboard is not None:
-            self.__close_tensorboard__()
+        if 'wandb' in self.__dict__ and self.wandb is not None:
+            self.__close_wandb__()
         self.log('Finished.')
 
     def call_it_a_day(self):
