@@ -1,0 +1,43 @@
+defaults:
+  - training: defaults
+  - model: defaults
+  - dataset: textualis_formata
+  - _self_
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+  verbose: False
+
+tag: textualis_formata
+
+dataset:
+  textualis_formata:
+    supervised: True
+
+model:
+  encoder:
+    H: 96
+
+  background:
+
+    init:
+      constant: [0.5, 0.5, 0.5]    
+      #[0.6392156862745098, 0.6, 0.5019607843137255]
+
+  loss:
+    ctc_factor: 0.1
+
+training:
+  n_workers: 8
+  batch_size: 16
+  num_epochs: 400
+  optimizer:
+    lr: 1.0e-3
+
+# python train.py textualis_formata.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=textualis_formata-0.1-3
+# python train.py textualis_formata.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.01 tag=textualis_formata-0.01-3
+# python train.py textualis_formata.yaml training.optimizer.lr=1.0e-4 model.loss.ctc_factor=0.1 tag=textualis_formata-0.1-4
+# python train.py textualis_formata.yaml training.optimizer.lr=1.0e-4 model.loss.ctc_factor=0.01 tag=textualis_formata-0.01-4
+

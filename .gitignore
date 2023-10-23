@@ -1,6 +1,7 @@
 /datasets/
 /runs/
 /.vscode/
+/south-north-ft/
 *-checkpoint.ipynb
 *.pyc
 trainer.log

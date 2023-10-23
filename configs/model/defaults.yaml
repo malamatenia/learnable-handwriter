@@ -1,5 +1,5 @@
 encoder:
-  H: 64
+  H: 96
   C: 3
   name: resnet32
   pooling_on_width: 4

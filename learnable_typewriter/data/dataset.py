@@ -1,12 +1,15 @@
 import json
+import csv
+import os
 from os import listdir
-from os.path import join
+from os.path import join, dirname
 from PIL import Image
 from torch.utils.data.dataset import Dataset
 from typing import Union
 from torchvision.transforms import Compose, RandomCrop
 
 import unicodedata
+import albumentations
 from dataclasses import dataclass
 import numpy as np
 
@@ -17,7 +20,6 @@ class UniDataset(Dataset): #inherits the torch Class
     path: str
     height: str
     split: str
-    alias: str
     crop_width: int = None
     # N_min: int = 0
     # W_max: int = float('inf')
@@ -29,21 +31,46 @@ class UniDataset(Dataset): #inherits the torch Class
     padding: Union[int, tuple] = None
     padding_value: Union[int, tuple] = None
     n_channels: int = 4
+    p: float = 0.0
+    script: str = None
+    disambiguation_mapping = join(dirname(__file__), 'disambiguation_table.csv')
 
     def __post_init__(self):
         self.image_dirs = listdir(join(self.path, 'images'))
         self.channels = {1: 'RGB', 3: 'L', 4: 'RGBA'}[self.n_channels]
+        self.load_disambiguation_mapping()
         self.extract_post_init()
         self.make_alphabet()
         self.transcribe_post_init()
         self.padding_post_init()
         self.split_it()
+        print(len(self))
+
+    def disambiguate_line(self, v):
+        print('Before:', v['label'])
+        v['label'] = self.disambiguate_label(v['label'])
+        print('After: ', v['label'])
+        return v
 
     def extract_post_init(self):
         self.data = []
-        for k, v in self.annotation.items():
+        annotation = {k: self.disambiguate_line(v) for k, v in self.annotation.items()} #yannis
+        for k, v in annotation.items():
+            if self.script is not None and v['script'] != self.script:
+                continue
             if self.starts_with is None or k.startswith(self.starts_with):
-                self.data.append((k, self.split_combining_(v), v['split']))
+                self.data.append((k, self.split_combining_(v), v['split'])) #met
+
+    def load_disambiguation_mapping(self):
+        with open(self.disambiguation_mapping, 'r') as file:
+                reader = csv.DictReader(file)
+                disambiguation_mapping = {row['char']: row['replacement'] for row in reader}
+        print(disambiguation_mapping)
+        self.disambiguation_mapping = disambiguation_mapping            
+            
+    def disambiguate_label(self, label):
+        print([c for c in unicodedata.normalize('NFC', label)])
+        return ''.join([self.disambiguation_mapping.get(c, c) for c in unicodedata.normalize('NFC', label)])
 
     def split_combining_(self, v):
         label = self.process_transcription(v['label'])
@@ -62,9 +89,9 @@ class UniDataset(Dataset): #inherits the torch Class
 
     def make_alphabet(self):
         if self.transcribe is not None:
-            self.alphabet = set(self.transcribe.values())
+           self.alphabet = set(self.transcribe.values())
         else:
-            self.alphabet = set(l for _, sentence , _ in self.data for l in sentence)
+           self.alphabet = set(l for _, sentence , _ in self.data for l in sentence)
 
     def transcribe_post_init(self):
         if self.transcribe is None:
@@ -72,13 +99,20 @@ class UniDataset(Dataset): #inherits the torch Class
 
         self.matching = {char: num for num, char in self.transcribe.items()} #puts chars in keys and num in index
 
-    def get_path(self,path):
-         for d in self.image_dirs:
-            if path.startswith(d):
-                return join(self.path, 'images', d, path)
 
-    def split_it(self,): #choses split and converts path into absolute path for the directory concerned
-        self.data = [(self.get_path(path), label) for (path, label, split) in self.data if split == self.split]
+    def split_it(self):
+        base_path = os.path.join(self.path, 'images')  # Base path where all the folders are
+        self.data = [(self.get_path(base_path, path), label) for (path, label, split) in self.data if split == self.split]
+
+    def get_path(self, base_path, path):
+        filename = os.path.basename(path)  # Get the filename from the provided path
+
+        # Recursively search for the .png file in all subfolders of the base_path
+        for root, dirs, files in os.walk(base_path):
+            if filename in files:
+                return os.path.join(root, filename)
+
+        raise FileNotFoundError(f"File not found: {filename}")
 
     def padding_post_init(self,):
         if self.padding_value is not None:
@@ -93,8 +127,11 @@ class UniDataset(Dataset): #inherits the torch Class
     def build_transform(self):
         transform = []
         if self.cropped:
-            transform.append(RandomCrop((self.height, self.crop_width), pad_if_needed=True, fill=self.padding_value, padding_mode='constant'))
-        self.transform = Compose(transform)
+            transform.append(albumentations.RandomCrop((self.height, self.crop_width), pad_if_needed=True, fill=self.padding_value, padding_mode='constant'))
+        if self.split == 'train' and self.p != 0:
+            print(f'RandomBrightnessContrast with p={self.p}')
+            transform.append(albumentations.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=self.p))
+        self.transform = albumentations.Compose(transform)
 
     def __len__(self): #mandatory 
         return len(self.data)
@@ -103,13 +140,14 @@ class UniDataset(Dataset): #inherits the torch Class
         return unicodedata.category(v) in ['Mn', 'Lm']
 
     def convert_label(self, vs):
-        return [self.matching[v] for v in vs] #gets every character from the NFC and converts it to integers
+       return [self.matching[v] for v in vs] #gets every character from the NFC and converts it to integers
+
 
     def __getitem__(self, i): #mandatory/realises the indexing of the Class instance so we can iterate through
         path, label = self.data[i]
         x = Image.open(path).convert(self.channels)
         x = x.resize((int(self.height * x.size[0] / x.size[1]), self.height)) #keeps constant aspect ratio
-        x = self.transform(x)
+        x = Image.fromarray(self.transform(image=np.array(x))['image'])
         return x, self.convert_label(label) #function that gets the label and applies transformation (returns a tuple)
 
     @property
@@ -130,7 +168,7 @@ class UniDataset(Dataset): #inherits the torch Class
     def annotation(self):
         with open(self.annotation_path) as f:
             return json.load(f)
-
+        
     @property
     def cropped(self):
         return self.crop_width is not None

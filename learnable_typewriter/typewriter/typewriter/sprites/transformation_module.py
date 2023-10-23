@@ -57,40 +57,40 @@ class IdentityModule(_AbstractTransformationModule):
 class ColorModule(_AbstractTransformationModule):
     def __init__(self, in_channels, **kwargs):
         super().__init__()
-        self.color_ch = kwargs['color_channels']
-        n_layers = kwargs['n_hidden_layers']
-        n_hidden_units = kwargs['n_hidden_units']
+        self.color_ch = kwargs['color_channels'] 
+        n_layers = kwargs['n_hidden_layers'] 
+        n_hidden_units = kwargs['n_hidden_units'] 
 
         # MLP
-        self.mlp = create_mlp_with_conv1d(in_channels, self.color_ch, n_hidden_units, n_layers)
-        self.mlp[-1].weight.data.zero_()
+        self.mlp = create_mlp_with_conv1d(in_channels, self.color_ch, n_hidden_units, n_layers) #an MultiLayeredPerceptron is created with 1D convolutional layers
+        self.mlp[-1].weight.data.zero_() #The weights and biases of the last layer of the MLP are initialized to zero
         self.mlp[-1].bias.data.zero_()
 
         # Identity transformation parameters
-        self.register_buffer('identity', torch.eye(self.color_ch, self.color_ch))
+        self.register_buffer('identity', torch.eye(self.color_ch, self.color_ch)) #torch.eye = Returns a 2-D tensor with ones on the diagonal and zeros elsewhere.
 
     def predict_parameters(self, x):
-        return self.mlp(x)
+        return self.mlp(x) # predicted parameters are returned
 
     def transform(self, x, beta):
-        if x.size(1) == 2 or x.size(1) > 3:
-            x, mask = torch.split(x, [self.color_ch, x.size(1) - self.color_ch], dim=1)
+        if x.size(1) == 2 or x.size(1) > 3: #If x has 2 channels or more than 3 channels, the split is based on self.color_ch
+            x, mask = torch.split(x, [self.color_ch, x.size(1) - self.color_ch], dim=1) #The input x is split into two parts: x and mask.
         else:
             mask = None
 
-        if x.size(1) == 1:
+        if x.size(1) == 1:  #If x has only 1 channel, it is expanded to 3 channels.
             x = x.expand(-1, 3, -1, -1)
 
-        weight = beta.view(-1, self.color_ch, 1)
-        weight = weight.expand(-1, -1, self.color_ch) * self.identity + self.identity
+        weight = beta.view(-1, self.color_ch, 1) 
+        weight = weight.expand(-1, -1, self.color_ch) * self.identity + self.identity #The predicted parameters (beta) are reshaped and multiplied by the identity matrix, creating a weight matrix (weight).
 
-        output = torch.einsum('bij, bjkl -> bikl', weight, x)
-        output = torch.sigmoid(output)
-        output = torch.clamp(output, 0, 1)
+        output = torch.einsum('bij, bjkl -> bikl', weight, x) #The transformation is applied using Einstein summation (torch.einsum) on the dimensions of weight and x
+        output = torch.sigmoid(output) 
+        output = torch.clamp(output, 0, 1) ##Sigmoid activation and clamping ensure that the output values are between 0 and 1
         if mask is not None:
-            output = torch.cat([output, mask], dim=1)
+            output = torch.cat([output, mask], dim=1) #If mask is not None, it is concatenated with the output along the channel dimension.
         
-        return output
+        return output #a transformed tensor
 
 class PositionModule(_AbstractTransformationModule):
     def __init__(self, in_channels, canvas_size, **kwargs):
@@ -108,8 +108,8 @@ class PositionModule(_AbstractTransformationModule):
         n_layers = kwargs['n_hidden_layers']
         n_hidden_units = kwargs['n_hidden_units']
 
-        self.mlp = create_mlp_with_conv1d(in_channels, 3, n_hidden_units, n_layers)
-        self.mlp[-1].weight.data.zero_()
+        self.mlp = create_mlp_with_conv1d(in_channels, 3, n_hidden_units, n_layers) #for s and t
+        self.mlp[-1].weight.data.zero_() #The weights and biases of the last layer of the MLP are initialized to zero
         self.mlp[-1].bias.data.zero_()
 
         # Spatial constraint
@@ -121,23 +121,23 @@ class PositionModule(_AbstractTransformationModule):
         self.register_buffer('eye', eye)
 
     def predict_parameters(self, x):
-        beta = self.mlp(x)
+        beta = self.mlp(x) #beta is the transformation parameters
 
-        s, t = beta.split([1, 2], dim=1)
+        s, t = beta.split([1, 2], dim=1) #it's split into scale and translation (shift) factors
 
-        if self.parametrization == 'exp':
+        if self.parametrization == 'exp': #scale is modified based on the specified parametrization (exp or sinh)
             s = torch.exp(s)
-        elif self.parametrization == 'sinh':
+        elif self.parametrization == 'sinh': 
             s = torch.sinh(s)
 
-        t = torch.clamp(t, min=-1.0, max=1.0)*self.t
+        t = torch.clamp(t, min=-1.0, max=1.0)*self.t #the translation is clamped to be between -1.0 and 1.0
 
-        return torch.cat([s, t], dim=1)
+        return torch.cat([s, t], dim=1) #concatenation
 
     def transform(self, x, beta):
         s, t = beta.split([1, 2], dim=1)
-        scale = s[..., None].expand(-1, 2, 2) * self.eye
-        beta = torch.cat([scale, t.unsqueeze(2)], dim=2)
+        scale = s[..., None].expand(-1, 2, 2) * self.eye #A scaling matrix (scale) is created based on the scale parameter.
+        beta = torch.cat([scale, t.unsqueeze(2)], dim=2) #A new set of transformation parameters (beta) is created by combining the scaling matrix and translation
  
         # grid is a batch of affine matrices
         grid = F.affine_grid(beta, (x.size(0), x.size(1), self.H, self.W), align_corners=False)

@@ -5,7 +5,7 @@ from omegaconf import OmegaConf
 from learnable_typewriter.trainer import Trainer
 
 
-def load_pretrained_model(path, device='cpu', default_run_dir=None, default_dataset_path=None, kargs=None, drop_crop=True):
+def load_pretrained_model(path, device='cpu', default_run_dir=None, default_dataset_path=None, kargs=None, drop_crop=True, conf={}):
     """ dataset = dataset alias """
     run_path = Path(path)
     try:
@@ -22,6 +22,7 @@ def load_pretrained_model(path, device='cpu', default_run_dir=None, default_data
         for k in cfg['dataset'].keys():
             if 'crop_width' in cfg['dataset'][k]:
                 del cfg['dataset'][k]['crop_width']
+            cfg['dataset'][k]['p'] = 0
 
     if kargs is not None:
         cache = list(sys.argv)
@@ -37,6 +38,7 @@ def load_pretrained_model(path, device='cpu', default_run_dir=None, default_data
     if default_dataset_path is not None:
         cfg['default_dataset_path'] = default_dataset_path
 
+    cfg = OmegaConf.merge(cfg, conf)
     trainer = Trainer(cfg)
     trainer.run_init()
     trainer.model.eval()

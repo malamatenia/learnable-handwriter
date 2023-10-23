@@ -1,6 +1,7 @@
 import torch
 from functools import wraps
 from itertools import chain, zip_longest
+from tqdm import tqdm
 
 from numpy.random import seed as np_seed
 from numpy.random import get_state as np_get_state
@@ -57,7 +58,7 @@ class use_seed:
 
 
 def alternate(*args):
-    for v in chain.from_iterable(zip_longest(*args)):
+    for v in tqdm(chain.from_iterable(zip_longest(*args)), total = sum(map(len, args))):
         if v is not None:
             yield v
 

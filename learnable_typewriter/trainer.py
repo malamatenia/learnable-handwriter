@@ -47,6 +47,7 @@ class Trainer(Evaluator):
     def __init_training__(self):
         self.n_batches = sum(len(dl) for dl in self.train_loader)
         self.n_epochs = self.cfg["training"]["num_epochs"]
+        #self.max_iteration = self.cfg["training"]["max_iteration"]
         self.flush_memory = self.cfg['training']['flush_mem']
         self.flush_period = self.cfg['training']['flush_per']
 
@@ -54,17 +55,26 @@ class Trainer(Evaluator):
         # Optimizer
         opt_params = dict(self.cfg["training"]["optimizer"]) or {}
         optimizer_name = opt_params.pop("name")
-        prototypes_kwargs = opt_params.pop('prototypes', {})
-        tsf_kwargs = opt_params.pop('transformation', {})
-        encoder_kwargs = opt_params.pop('encoder', {})
+        finetune_mode = opt_params.pop('finetune', '')
+        if finetune_mode == '':
+            prototypes_kwargs = opt_params.pop('prototypes', {})
+            tsf_kwargs = opt_params.pop('transformation', {})
+            encoder_kwargs = opt_params.pop('encoder', {})
 
-        self.optimizer = get_optimizer(optimizer_name)([
-            dict(params=self.model.prototypes_parameters(), **prototypes_kwargs),
-            dict(params=self.model.transformation_parameters(), **tsf_kwargs),
-            dict(params=chain(self.model.encoder.parameters(), self.model.selection.sprite_params(), self.model.selection.encoder_params()), **encoder_kwargs)],
-            **opt_params)
+            self.optimizer = get_optimizer(optimizer_name)([
+                dict(params=self.model.prototypes_parameters(), **prototypes_kwargs),
+                dict(params=self.model.transformation_parameters(), **tsf_kwargs),
+                dict(params=chain(self.model.encoder.parameters(), self.model.selection.sprite_params(), self.model.selection.encoder_params()), **encoder_kwargs)],
+                **opt_params)
+        elif finetune_mode == 'sprites':
+            opt_params.pop('prototypes', {})
+            opt_params.pop('transformation', {})
+            opt_params.pop('encoder', {})
+            self.optimizer = get_optimizer(optimizer_name)(chain([self.model.sprites.masks_.proto]), **opt_params)
+        else:
+            raise NotImplementedError(f'finetune_mode = {finetune_mode}')
+
         self.model.set_optimizer(self.optimizer)
-
         self.log("Optimizer:\n" + str(self.optimizer))
 
     def __init_milestone__(self):
@@ -147,9 +157,14 @@ class Trainer(Evaluator):
             self.log('training starts')
             torch.cuda.empty_cache()
 
-            for self.epoch in range(self.epoch, self.n_epochs + 1):
-                for self.batch, batch_data in enumerate(alternate(*self.train_loader), start=1):
+            #exit_flag = False  # Initialize exit_flag before the loop
+            for self.epoch in range(self.epoch, self.n_epochs + 1): #add 
+                pbar = enumerate(alternate(*self.train_loader), start=1)
+                for self.batch, batch_data in pbar:
                     self.cur_iter += batch_data['x'].size()[0]
+                    #if self.cur_iter >= self.max_iteration: #stop the training when hitting max_iterations regardless nb_of_epochs
+                        #exit_flag = True
+                        #break
                     self.run_step(batch_data)
 
                     del batch_data
@@ -158,6 +173,9 @@ class Trainer(Evaluator):
 
                 self.do_milestone()
                 self.step()
+
+                #if exit_flag:
+                #    break
 
             message = "Training finished - evaluating"
 

@@ -52,13 +52,13 @@ class Logger(Model):
 
     def __init_sample_images__(self):
         self.images_to_tsf, self.num_tsf = {True: [], False: []}, self.log_cfg['train']['images']['how_many']
-        splits = ['train'] + (['test'] if self.val_flag else [])
+        splits = ['train'] #+ (['val'] if self.val_flag else []) #we changed that from +test to +val because we split the dataset to train+val without test 18/10
 
         for split in splits:
             for i, dl in enumerate(self.get_dataloader(split=split, batch_size=self.num_tsf, dataset_size=self.num_tsf, remove_crop=True)):
                 if self.dataset_kwargs[i].get('split', split) != split:
                     continue
-                
+
                 data, alias = next(iter(dl)), self.dataset_kwargs[i]['alias']
                 self.images_to_tsf[data['supervised']].append((alias, data))
 

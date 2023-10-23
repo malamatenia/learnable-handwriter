@@ -19,11 +19,15 @@ dataset:
 
 model:
   encoder:
-    H: 64
+    H: 96
+  
+  window:
+    size: ${eval:${model.encoder.H}//2} #one //2 and one //4 to see the results
 
   background:
     init:
-      constant: [0.6392156862745098, 0.6, 0.5019607843137255]
+      constant: [0.5, 0.5, 0.50]
+      #[0.6392156862745098, 0.6, 0.5019607843137255]
 
   loss:
     ctc_factor: 0.1
