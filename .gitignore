@@ -1,6 +1,8 @@
 /datasets/
 /runs/
 /wandb/
+/scripts/wandb/
+scripts/train.log
 /.vscode/
 /south-north-ft/
 *-checkpoint.ipynb
