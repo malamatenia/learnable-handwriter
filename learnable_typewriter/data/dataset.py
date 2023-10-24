@@ -44,12 +44,9 @@ class UniDataset(Dataset): #inherits the torch Class
         self.transcribe_post_init()
         self.padding_post_init()
         self.split_it()
-        print(len(self))
 
     def disambiguate_line(self, v):
-        print('Before:', v['label'])
         v['label'] = self.disambiguate_label(v['label'])
-        print('After: ', v['label'])
         return v
 
     def extract_post_init(self):
@@ -65,11 +62,10 @@ class UniDataset(Dataset): #inherits the torch Class
         with open(self.disambiguation_mapping, 'r') as file:
                 reader = csv.DictReader(file)
                 disambiguation_mapping = {row['char']: row['replacement'] for row in reader}
-        print(disambiguation_mapping)
+
         self.disambiguation_mapping = disambiguation_mapping            
             
     def disambiguate_label(self, label):
-        print([c for c in unicodedata.normalize('NFC', label)])
         return ''.join([self.disambiguation_mapping.get(c, c) for c in unicodedata.normalize('NFC', label)])
 
     def split_combining_(self, v):

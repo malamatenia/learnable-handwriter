@@ -6,7 +6,7 @@ import torch
 
 from torchvision.utils import make_grid
 from learnable_typewriter.model import Model
-from learnable_typewriter.utils.generic import nonce, cfg_flatten
+from learnable_typewriter.utils.generic import nonce, cfg_flatten, add_nest
 from learnable_typewriter.utils.image import img, to_three
 import wandb
 
@@ -68,16 +68,16 @@ class Logger(Model):
             self.wandb = nonce()
         else:
             self.wandb = wandb.init(
-                # Set the project where this run will be logged
-                project=os.path.split(self.run_dir),
-                # Track hyperparameters and run metadata
-                config=self.config
+                project='learnable-scriber',
+                name=self.cfg["tag"],
+                config=cfg_flatten(self.cfg)
             )
-            self.cfg_flat = cfg_flatten(self.cfg)
-            self.keep_steps = []
+            self.log_wandb_ = {}
+            # self.cfg_flat = 
+            # self.keep_steps = []
 
     def __close_wandb__(self):
-        self.wandb.finished()
+        self.wandb.finish()
 
     def get_metrics(self, split):
         return getattr(self, f'{split}_metrics')
@@ -136,14 +136,14 @@ class Logger(Model):
         if len(x.shape) == 2:
             x = np.repeat(x[:, :, None], 3, axis=2)
 
-        wandb.log({"images": wandb.Image(x, caption=name)}, step=self.cur_iter)
+        add_nest(self.log_wandb_, name, wandb.Image(x))
 
     @torch.no_grad()
     def save_prototypes(self, header): # 00:10 twerk is the new tsifteteli
         masks = self.model.sprites.masks.cpu().numpy()
         if self.supervised:
             masks = torch.stack([torch.from_numpy(text_over_image(masks[i].squeeze(0), self.model.sprite_char[i])).unsqueeze(0) for i in range(masks.shape[0])], dim=0)
-        self.save_image_grid(masks, f'{header}/masks', nrow=5)
+        self.save_image_grid(masks, f'masks/{header}', nrow=5)
 
     @torch.no_grad()
     def save_transforms(self, header):
@@ -154,19 +154,32 @@ class Logger(Model):
                 decompose = self.decompositor
                 obj = decompose(images_to_tsf)
                 reco, seg = obj['reconstruction'].cpu(), obj['segmentation'].cpu()
-                
-                obj_al = decompose(images_to_tsf, align=True) # maybe flag that on a future version
-                reco_al, seg_al = obj_al['reconstruction'].cpu(), obj_al['segmentation'].cpu()
-                
-                transformed_imgs = torch.cat([
+
+                objs = [
                     to_three(images_to_tsf['x']).cpu().unsqueeze(0),
                     reco.unsqueeze(0),
                     seg.unsqueeze(0),
-                    reco_al.unsqueeze(0),
-                    seg_al.unsqueeze(0),
-                ], dim=0)
-                transformed_imgs = torch.flatten(transformed_imgs, start_dim=0, end_dim=1)
-                self.save_image_grid(transformed_imgs, f'{header}/examples/{mode}/{alias}', nrow=images_to_tsf['x'].size()[0])
+                ]
+                try:
+                    obj_al = decompose(images_to_tsf, align=True) # maybe flag that on a future version
+                    reco_al, seg_al = obj_al['reconstruction'].cpu(), obj_al['segmentation'].cpu()
+                    objs.append(reco_al.unsqueeze(0))
+                    objs.append(seg_al.unsqueeze(0))
+                except AttributeError:
+                    import warnings; warnings.warn('Imputer load fail... Ignoring decompose.')
+                
+                transformed_imgs = torch.cat(objs, dim=0)
+                images = [
+                    wandb.Image(
+                        img(
+                            torch.clamp(torch.cat([
+                                transformed_imgs[i][j]
+                                for i in range(transformed_imgs.shape[0])
+                            ], dim=1), 0, 1)
+                        )
+                    ) for j in range(transformed_imgs.shape[1])]
+                modet = ('supervised' if mode else 'unsupervised')
+                add_nest(self.log_wandb_, f'{alias}/examples/{header}/{modet}', images)
 
     @torch.no_grad()
     def save_image_grid(self, images, title, nrow):
@@ -179,11 +192,14 @@ class Logger(Model):
         return np.mean([v['reco_loss'].avg for v in self.train_metrics.values()])
 
     def log_wandb(self, split):
-        logs = {}
         for k, metrics in self.metrics_[split].items():
-            for t, tn in zip(['loss', 'reco', 'time/img'], ['loss', 'reco', 'time-per-img']):
+            for t in ['loss', 'reco', 'time/img']:
                 losses = list(filter(lambda s: t in s, metrics.names))
                 for l in losses:
-                    logs[f'{tn}/{k}/{l}/{split}'] = metrics[l].avg
+                    lt = l.replace('_train', '').replace('_test', '').replace('_val', '')
+                    add_nest(self.log_wandb_, f'{k}/{l}/{split}', metrics[l].avg)
 
-        wandb.log(logs, step=self.cur_iter)
+    def push_wandb(self):
+        if len(self.log_wandb_):
+            wandb.log(self.log_wandb_, step=self.cur_iter)
+            self.log_wandb_ = {}

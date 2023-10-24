@@ -80,3 +80,15 @@ def cfg_flatten(cfg):
         return 'None'
     else:
         return str(cfg)
+
+def add_nest(d, tag, v):
+    # convert dictionaries of the form a/b/c : v
+    # to {'a': {'b': {'c': v}}}
+    tags = tag.split('/')
+    for i, e in enumerate(tags):
+        if i == len(tags)-1:
+            d[e] = v
+        else:
+            if e not in d:
+                d[e] = dict()
+            d = d[e]

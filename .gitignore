@@ -1,8 +1,10 @@
 /datasets/
 /runs/
+/wandb/
 /.vscode/
 /south-north-ft/
 *-checkpoint.ipynb
 *.pyc
 trainer.log
 .ipynb_checkpoints
+train.log

@@ -3,9 +3,16 @@ import torch
 from torch.utils.cpp_extension import load
 from torch.nn.utils.rnn import pad_sequence
 from torch.nn.functional import one_hot
+from subprocess import CalledProcessError
 
 module_path = os.path.dirname(__file__)
-imputer = load("imputer_fn", sources=[os.path.join(module_path, f) for f in ["best_alignment.cpp", "best_alignment.cu", "imputer_loss.cu"]])
+try:
+    imputer = load("imputer_fn", sources=[os.path.join(module_path, f) for f in ["best_alignment.cpp", "best_alignment.cu", "imputer_loss.cu"]])
+except CalledProcessError:
+    import warnings
+    warnings.warn('Failed loading imputer')
+    def imputer(*args, **kargs):
+        raise ImportError('Failed to load imputer...')
 
 def get_alignment_path(log_alpha, path):
     if log_alpha.shape[0] == 1:

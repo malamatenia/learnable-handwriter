@@ -10,7 +10,7 @@ from learnable_typewriter.evaluate.quantitative.metrics import Metrics, AverageM
 from learnable_typewriter.evaluate.quantitative.sprite_matching.evaluate import er_evaluate_unsupervised, er_evaluate_supervised, metrics_to_average_sub
 from learnable_typewriter.evaluate.qualitative.decompositor import Decompositor
 from learnable_typewriter.logger import Logger
-from learnable_typewriter.utils.generic import nonce
+from learnable_typewriter.utils.generic import nonce, add_nest
 
 
 class Evaluator(Logger):
@@ -58,16 +58,13 @@ class Evaluator(Logger):
         self.log(f'computing error-rate')
         self.cer_loss_val_ = []
         tid = ('best-model:' if self.eval_best_mode else '')
-        logs = {}
         for (alias, split), metrics in average.items():
             for k, v in metrics.items():
                 if k in {'cer', 'wer', 'ser'}:
-                    logs[f'metrics/{alias}/{k}/{split}/'] = v
+                    add_nest(self.log_wandb_, f'metrics/{alias}/{k}/{split}', v)
                     self.log(f'{tid}[{alias}/{split}] {k}:{v}', eval=True)
                     if k == 'cer' and split == 'val':
                         self.cer_loss_val_.append(v)
-
-        wandb.log(logs, step=self.cur_iter)
 
     def log_er_texts(self, metadata, mapping, max_lines=10):
         if isinstance(self.wandb, nonce):
@@ -80,27 +77,23 @@ class Evaluator(Logger):
             table = wandb.Table(columns=["Pred", "Ground Truth"])
             for (p, g) in zip(pred, gt):
                 table.add_data(p, g)
-            tables[f'{alias}/{split}/' + ('best' if self.eval_best_mode else 'normal')] = table
+            tag = f'{alias}/{split}/' + ('best' if self.eval_best_mode else 'normal')
+            add_nest(self.log_wandb_, tag, table)
 
         k, vs = list(zip(*mapping.items()))
-        tables['mapping'] = wandb.Table(columns=list(k))
-        for v in vs:
-            tables['mapping'].add_data(v)
-        wandb.log(tables, step=self.cur_iter)
+        self.log_wandb_['mapping'] = wandb.Table(columns=list(k))
+        self.log_wandb_['mapping'].add_data(*vs)
 
     def log_er_last(self, average):
         self.log_er(average)
 
-        metric_dict = {}
         for (alias, split), metrics in average.items():
             for er, v  in metrics.items():
                 if er in {'cer', 'wer', 'ser'}:
-                    k = f'metrics/{er}/{alias}/{split}'
-                    metric_dict.update({k: v})
+                    k = f'{alias}/{er}/{split}'
+                    add_nest(self.log_wandb_, k, v)
                     self.log(f'{k}: {v}', eval=True)
 
-        if not self.eval:
-            wandb.log(metric_dict, step=self.cur_iter, step=self.cur_iter)
 
     @property
     def cer_loss_val(self):
