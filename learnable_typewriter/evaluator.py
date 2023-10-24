@@ -61,7 +61,8 @@ class Evaluator(Logger):
         for (alias, split), metrics in average.items():
             for k, v in metrics.items():
                 if k in {'cer', 'wer', 'ser'}:
-                    add_nest(self.log_wandb_, f'metrics/{alias}/{k}/{split}', v)
+                    if not np.isnan(v):
+                        add_nest(self.log_wandb_, f'metrics/{alias}/{k}/{split}', v)
                     self.log(f'{tid}[{alias}/{split}] {k}:{v}', eval=True)
                     if k == 'cer' and split == 'val':
                         self.cer_loss_val_.append(v)
