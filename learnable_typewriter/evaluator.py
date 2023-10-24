@@ -1,6 +1,7 @@
 from itertools import chain
 from collections import defaultdict
 
+import wandb
 import pandas as pd
 import numpy as np
 import torch
@@ -9,7 +10,7 @@ from learnable_typewriter.evaluate.quantitative.metrics import Metrics, AverageM
 from learnable_typewriter.evaluate.quantitative.sprite_matching.evaluate import er_evaluate_unsupervised, er_evaluate_supervised, metrics_to_average_sub
 from learnable_typewriter.evaluate.qualitative.decompositor import Decompositor
 from learnable_typewriter.logger import Logger
-from learnable_typewriter.utils.generic import nonce
+from learnable_typewriter.utils.generic import nonce, add_nest
 
 
 class Evaluator(Logger):
@@ -60,38 +61,39 @@ class Evaluator(Logger):
         for (alias, split), metrics in average.items():
             for k, v in metrics.items():
                 if k in {'cer', 'wer', 'ser'}:
-                    self.tensorboard.add_scalar(f'metrics/{alias}/{k}/{split}/', v, self.cur_iter)
+                    add_nest(self.log_wandb_, f'metrics/{alias}/{k}/{split}', v)
                     self.log(f'{tid}[{alias}/{split}] {k}:{v}', eval=True)
                     if k == 'cer' and split == 'val':
                         self.cer_loss_val_.append(v)
 
     def log_er_texts(self, metadata, mapping, max_lines=10):
-        if isinstance(self.tensorboard, nonce):
+        if isinstance(self.wandb, nonce):
             return
 
+        tables = {}
         for (alias, split), metrics in metadata.items():
             pred, gt = metrics['texts'], metrics['gt']
             pred, gt = pred[:max_lines], gt[:max_lines]
-            for i, (p, g) in enumerate(zip(pred, gt)):
-                if self.eval_best_mode:
-                    self.tensorboard.add_text(f'{alias}/{split}/{i}/pred{self.eval_best_str}', f'`{p}`', self.cur_iter)
-                else:
-                    self.tensorboard.add_text(f'{alias}/{split}/{i}/pred+gt', '  \n'.join([f'`{p}`', f'`{g}`']), self.cur_iter)
-        self.tensorboard.add_text(f'{alias}/{split}/mapping', str(mapping), self.cur_iter)
+            table = wandb.Table(columns=["Pred", "Ground Truth"])
+            for (p, g) in zip(pred, gt):
+                table.add_data(p, g)
+            tag = f'{alias}/{split}/' + ('best' if self.eval_best_mode else 'normal')
+            add_nest(self.log_wandb_, tag, table)
+
+        k, vs = list(zip(*mapping.items()))
+        self.log_wandb_['mapping'] = wandb.Table(columns=list(k))
+        self.log_wandb_['mapping'].add_data(*vs)
 
     def log_er_last(self, average):
         self.log_er(average)
 
-        metric_dict = {}
         for (alias, split), metrics in average.items():
             for er, v  in metrics.items():
                 if er in {'cer', 'wer', 'ser'}:
-                    k = f'metrics/{er}/{alias}/{split}'
-                    metric_dict.update({k: v})
+                    k = f'{alias}/{er}/{split}'
+                    add_nest(self.log_wandb_, k, v)
                     self.log(f'{k}: {v}', eval=True)
 
-        if not self.eval:
-            self.tensorboard.add_hparams(self.cfg_flat, metric_dict)
 
     @property
     def cer_loss_val(self):
