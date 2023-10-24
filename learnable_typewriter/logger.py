@@ -197,7 +197,8 @@ class Logger(Model):
                 losses = list(filter(lambda s: t in s, metrics.names))
                 for l in losses:
                     lt = l.replace('_train', '').replace('_test', '').replace('_val', '')
-                    add_nest(self.log_wandb_, f'{k}/{lt}/{split}', metrics[l].avg)
+                    if metrics[l].count > 0:
+                        add_nest(self.log_wandb_, f'{k}/{lt}/{split}', metrics[l].avg)
 
     def push_wandb(self):
         if len(self.log_wandb_):

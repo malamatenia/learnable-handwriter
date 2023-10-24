@@ -8,9 +8,9 @@ from subprocess import CalledProcessError
 module_path = os.path.dirname(__file__)
 try:
     imputer = load("imputer_fn", sources=[os.path.join(module_path, f) for f in ["best_alignment.cpp", "best_alignment.cu", "imputer_loss.cu"]])
-except CalledProcessError:
+except Exception as ex:
     import warnings
-    warnings.warn('Failed loading imputer')
+    warnings.warn('Failed loading imputer: ' + str(ex))
     def imputer(*args, **kargs):
         raise ImportError('Failed to load imputer...')
 
