@@ -86,7 +86,6 @@ class ColorModule(_AbstractTransformationModule):
 
         output = torch.einsum('bij, bjkl -> bikl', weight, x) #The transformation is applied using Einstein summation (torch.einsum) on the dimensions of weight and x
         output = torch.sigmoid(output) 
-        output = torch.clamp(output, 0, 1) ##Sigmoid activation and clamping ensure that the output values are between 0 and 1
         if mask is not None:
             output = torch.cat([output, mask], dim=1) #If mask is not None, it is concatenated with the output along the channel dimension.
         
