@@ -10,6 +10,7 @@ from learnable_typewriter.utils.generic import nonce, cfg_flatten, add_nest
 from learnable_typewriter.utils.image import img, to_three
 import wandb
 
+
 from PIL import ImageFont, ImageDraw, Image
 from os.path import dirname, join
 FONT = join(dirname(dirname(__file__)), '.media', 'Junicode.ttf')
@@ -58,7 +59,7 @@ class Logger(Model):
             for i, dl in enumerate(self.get_dataloader(split=split, batch_size=self.num_tsf, dataset_size=self.num_tsf, remove_crop=True)):
                 if self.dataset_kwargs[i].get('split', split) != split:
                     continue
-                
+
                 data, alias = next(iter(dl)), self.dataset_kwargs[i]['alias']
                 self.images_to_tsf[data['supervised']].append((alias, data))
 
@@ -73,8 +74,6 @@ class Logger(Model):
                 config=cfg_flatten(self.cfg)
             )
             self.log_wandb_ = {}
-            # self.cfg_flat = 
-            # self.keep_steps = []
 
     def __close_wandb__(self):
         self.wandb.finish()
@@ -142,8 +141,17 @@ class Logger(Model):
     def save_prototypes(self, header): # 00:10 twerk is the new tsifteteli
         masks = self.model.sprites.masks.cpu().numpy()
         if self.supervised:
-            masks = torch.stack([torch.from_numpy(text_over_image(masks[i].squeeze(0), self.model.sprite_char[i])).unsqueeze(0) for i in range(masks.shape[0])], dim=0)
+            # prints in alphanumerical order
+            masks = torch.stack([torch.from_numpy(text_over_image(masks[i].squeeze(0), self.model.sprite_char[i])).unsqueeze(0) for i in range(masks.shape[0])], dim=0) 
         self.save_image_grid(masks, f'masks/{header}', nrow=5)
+
+        if self.supervised:
+            masks = self.model.sprites.masks.cpu().numpy()
+            # Get the character occurrences order
+            sorted_indices = sorted(self.character_occurrences, key=lambda k: self.character_occurrences[k], reverse=True)
+            # Process and stack the sorted masks
+            masks = torch.stack([torch.from_numpy(text_over_image(masks[i].squeeze(0), self.model.sprite_char[i])).unsqueeze(0) for i in sorted_indices], dim=0)
+            self.save_image_grid(masks, f'masks-ordered/{header}', nrow=5)
 
     @torch.no_grad()
     def save_transforms(self, header):
