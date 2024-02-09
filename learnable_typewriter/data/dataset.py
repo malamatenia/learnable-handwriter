@@ -32,10 +32,10 @@ class UniDataset(Dataset): #inherits the torch Class
     exclude: str = None
     supervised: bool = False
     padding: Union[int, tuple] = None
-    padding_value: Union[int, tuple] = None
     n_channels: int = 4
     p: float = 0.0
     script: str = None
+    filter_by_name: str = None
     disambiguation_mapping = join(dirname(__file__), 'disambiguation_table.csv')
 
     def __post_init__(self):
@@ -63,10 +63,12 @@ class UniDataset(Dataset): #inherits the torch Class
             prefixes = [prefixes]
 
         def starts_with_condition(key):
-            return any(key.startswith(prefix) for prefix in prefixes)       
+            return any(key.startswith(prefix) for prefix in prefixes) 
 
         for k, v in annotation.items():
             if self.script is not None and v['script'] != self.script:
+                continue
+            if self.filter_by_name is not None and self.filter_by_name not in k:
                 continue
             if self.starts_with is None or starts_with_condition(k):
                 self.data.append((k, self.split_combining_(v), v['split']))
@@ -151,11 +153,11 @@ class UniDataset(Dataset): #inherits the torch Class
         raise FileNotFoundError(f"File not found: {filename}")
 
     def padding_post_init(self,):
-        if self.padding_value is not None:
-            if isinstance(self.padding_value, tuple) and all(((not isinstance(p, int)) and p < 1) for p in self.padding_value):
-                self.padding_value = tuple(int(p*255) for p in self.padding_value)
-            elif self.padding_value < 1 and isinstance(self.padding_value, float):
-                self.padding_value = int(self.padding_value*255)
+        if self.padding is not None:
+            if isinstance(self.padding, tuple) and all(((not isinstance(p, int)) and p < 1) for p in self.padding):
+                self.padding = tuple(int(p*255) for p in self.padding)
+            elif self.padding < 1 and isinstance(self.padding, float):
+                self.padding = int(self.padding * 255)
 
         self.build_transform()
         assert not (self.supervised and not self.has_labels), "If dataset is used in supervised mode it should contain labels."

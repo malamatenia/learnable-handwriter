@@ -139,7 +139,7 @@ class Logger(Model):
 
     @torch.no_grad()
     def save_prototypes(self, header): # 00:10 twerk is the new tsifteteli
-        masks = self.model.sprites.masks.cpu().numpy()
+        masks = self.model.sprites.masks.cpu().numpy() #type is numpy.ndarray
         if self.supervised:
             # prints in alphanumerical order
             masks = torch.stack([torch.from_numpy(text_over_image(masks[i].squeeze(0), self.model.sprite_char[i])).unsqueeze(0) for i in range(masks.shape[0])], dim=0) 

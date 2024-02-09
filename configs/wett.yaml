@@ -1,7 +1,7 @@
 defaults:
   - training: defaults
   - model: defaults
-  - dataset: cremma
+  - dataset: cremma_masks
   - _self_
 
 hydra:
@@ -13,7 +13,7 @@ hydra:
 tag: wett
 
 dataset:
-  cremma:
+  cremma_masks:
     supervised: True
     starts_with: 'Wett'
 
@@ -23,7 +23,8 @@ model:
 
   background:
     init:
-      constant: [0.8862745098039216, 0.8745098039215686, 0.8549019607843137]
+      constant: [0.5, 0.5, 0.5]
+      #[0.8862745098039216, 0.8745098039215686, 0.8549019607843137]
 
   loss:
     ctc_factor: 0.1
@@ -35,4 +36,4 @@ training:
   optimizer:
     lr: 1.0e-3
 
-# python train.py wett.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=wett-0.1
+# python train.py wett.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=wett-mask-0.1-3

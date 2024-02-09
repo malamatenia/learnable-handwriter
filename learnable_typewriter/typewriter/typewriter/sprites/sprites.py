@@ -24,7 +24,7 @@ class Generator(nn.Module):
                 nn.GroupNorm(8, self.latent_dim),
                 nn.ReLU(inplace=True),
                 nn.Linear(self.latent_dim, self.latent_dim),
-                nn.Sigmoid()
+                nn.Sigmoid() #je mets la sigmoide après la reconstruction, je la sors du générateur
             )
         elif type == 'marionette':
             logger('Generator is Marionette')
@@ -94,6 +94,7 @@ class Sprites(nn.Module):
         self.masks_ = Generator(self.n_sprites*self.per_character, self.sprite_size, type=cfg['gen_type'], logger=logger)
         self.frozen = False
 
+
         self.active_prototypes = ones(len(self))
         self.clamp_func = get_clamp_func(cfg['use_clamp'])
 
@@ -101,7 +102,7 @@ class Sprites(nn.Module):
         return self.n_sprites*self.per_character
 
     @property
-    def masks(self):
+    def masks(self): 
         masks = self.masks_()
-        return masks if self.training else self.clamp_func(masks)
+        return self.clamp_func(masks) if self.training else self.clamp_func(masks) #now it uses clamp even in training
 

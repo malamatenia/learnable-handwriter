@@ -1,7 +1,7 @@
 defaults:
   - training: defaults
   - model: defaults
-  - dataset: cremma
+  - dataset: cremma_masks
   - _self_
 
 hydra:
@@ -13,7 +13,7 @@ hydra:
 tag: arras
 
 dataset:
-  cremma:
+  cremma_masks:
     supervised: True
     starts_with: 'Arras-861'
 
@@ -37,4 +37,8 @@ training:
   optimizer:
     lr: 1.0e-4
 
-#python train.py arras.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=arras-96
+  log:
+    milestone: 1
+
+
+#python train.py arras.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=arras-mask-0.1-3

@@ -64,6 +64,11 @@ class LearnableTypewriter(nn.Module):
         self.compositor = LayeredCompositor(self)
         self.debug = False
 
+        self.freeze_milestone = cfg['sprites'].get('freeze', 0)
+        print(f'freeze_milestone = {self.freeze_milestone}')
+        self.epoch = None
+        
+
     @property
     def mode(self):
         return self.sprites.masks_.mode
@@ -86,6 +91,10 @@ class LearnableTypewriter(nn.Module):
             return self.layer_transformation.only_id_activated
         else:
             return False
+    
+    @property #08/01
+    def unfrozen_sprites(self):
+        return not (self.freeze_milestone > 0 and self.epoch < self.freeze_milestone and self.epoch is not None)
 
     def forward(self, x, return_params=False):
         # Predict the spatial transformation parameters
@@ -105,15 +114,14 @@ class LearnableTypewriter(nn.Module):
     def predict_parameters(self, x, features):
         tsf_bkgs_param = None
         if self.background:
-            tsf_bkgs_param = torch.sigmoid(self.background_transformation.predict_parameters(x, features).permute(1, 2, 0, 3))
-
+            tsf_bkgs_param = torch.clamp(self.background_transformation.predict_parameters(x, features).permute(1, 2, 0, 3), min=0, max=1)
         tsf_layers_params = self.layer_transformation.predict_parameters(x, features).squeeze(0)
         return tsf_layers_params, tsf_bkgs_param
 
     def transform_background(self, color, size):
         beta = self.beta_bkg.expand(size[0], -1, -1)
         grid = F.affine_grid(beta, size, align_corners=False)
-        out = F.grid_sample(color, grid, mode='bilinear', padding_mode='border', align_corners=False)[0]
+        out = F.grid_sample(color, grid, mode='bilinear', padding_mode='border', align_corners=False)
         return out
 
     def transform_sprites_p(self, sprites_p, params_layers_p):
@@ -129,8 +137,9 @@ class LearnableTypewriter(nn.Module):
     
     def predict_cell_per_cell(self, x, return_masks_frg=False, return_params=False, align=False): #The method predict_cell_per_cell takes an input image and applies the learned transformation to each "cell" of the image separately, allowing the model to learn spatial transformations that can be applied locally to specific regions of the input.
         img = x['x'] = x['x'].to(self.device) #The input image is first passed through an encoder to extract features
-        B, C, H, W = img.size() #save BCHW in variables
+        B, C, H, W = img.size()
         C = min(C, 3) 
+
         features = self.encoder(img)
 
         tsf_layers_params, tsf_bkgs_param = self.predict_parameters(img, features) #predicts transformation parameters for the input image and its background 
@@ -140,14 +149,16 @@ class LearnableTypewriter(nn.Module):
         if self.background:
             tsf_bkgs = self.transform_background(tsf_bkgs_param, (B, C, H, W)) #If the background flag is set to True, the background of the input image is transformed using the predicted background parameters.
 
-        # select which sprites to place
-        if align:
-            selection = self.selection(features, self.sprites, gt_align=x, model=self) # selects which sprites to place
-        else:
-            selection = self.selection(features, self.sprites, model=self) # selects which sprites to place
+        with torch.set_grad_enabled(self.unfrozen_sprites):
+            # select which sprites to place
+            if align:
+                selection = self.selection(features, self.sprites, gt_align=x, model=self) 
+            else:
+                selection = self.selection(features, self.sprites, model=self)
 
-        # transform sprites
-        all_tsf_layers, all_tsf_masks = self.transform_sprites(selection['S'], tsf_layers_params) # transformed using the predicted transformation parameters
+            # transform sprites
+            all_tsf_layers, all_tsf_masks = self.transform_sprites(selection['S']*int(self.unfrozen_sprites), tsf_layers_params) # transformed using the predicted transformation parameters
+
         composed = self.compositor(to_three(img), tsf_bkgs, all_tsf_layers, all_tsf_masks) #compose the transformed sprites and background onto the input image
 
         output = {
@@ -172,18 +183,15 @@ class LearnableTypewriter(nn.Module):
 
         return output 
 
-    def step(self):
-        pass
-
-    def transform_sprites(self, sprites, tsf_layers_params):
+    def transform_sprites(self, sprites, tsf_layers_params): 
         n_cells = tsf_layers_params.size(-1) #an integer representing the size of the tsf_layers_params tensor along its last dimension = features or representations
-
         tsf_sprites, tsf_masks = [], []
+
         for p in range(n_cells):
             tsf_layers_params_p = tsf_layers_params[:, :, p] # For each cell index p, tsf_layers_params_p is defined as a slice of tsf_layers_params along the last dimension
-            tsf = self.transform_sprites_p(sprites[p], tsf_layers_params_p)
+            tsf = self.transform_sprites_p(sprites[p], tsf_layers_params_p) #split if and create a self.noise, masks, sprites variable that i'll append to the tsf[1] which is the masks #tsf_layers, tsf_masks, tsf_noise = torch.split(tsf_layers, [C, 1, 1], dim=3
 
-            tsf_sprites.append(tsf[0])
+            tsf_sprites.append(tsf[0]) 
             tsf_masks.append(tsf[1])
 
         if hasattr(self, 'noise'):
@@ -273,3 +281,6 @@ class LearnableTypewriter(nn.Module):
         img = x['x'] = x['x'].to(self.device)
         features = self.encoder(img)
         return self.selection(features, self.sprites)
+
+    def step(self):
+        pass

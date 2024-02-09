@@ -15,7 +15,7 @@ tag: fr12400
 dataset:
   south_north_textualis:
     supervised: True
-    starts_with: 'ds_facsb'
+    starts_with: 'btv1b525068331'
 
 model:
   encoder:
@@ -35,4 +35,4 @@ training:
   optimizer:
     lr: 1.0e-4
 
-#python train.py Fr12400.yaml training.optimizer.lr=1.0e-4 model.loss.ctc_factor=0.01 tag=fr12400-0.01-4
+#python train.py Fr12400.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.01 tag=fr12400

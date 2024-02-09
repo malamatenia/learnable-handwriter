@@ -15,7 +15,7 @@ tag: fr1728
 dataset:
   south_north_textualis:
     supervised: True
-    starts_with: 'facs_28_r'
+    starts_with: 'btv1b84473026'
 
 model:
   encoder:
@@ -35,4 +35,4 @@ training:
   optimizer:
     lr: 1.0e-4
 
-#python train.py Fr1728.yaml training.optimizer.lr=1.0e-4 model.loss.ctc_factor=0.001 tag=fr1728-0.001-4
+#python train.py Fr1728.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=fr1728

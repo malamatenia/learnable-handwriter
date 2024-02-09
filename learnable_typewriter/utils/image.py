@@ -42,6 +42,10 @@ def img(arr):
     if np.issubdtype(arr.dtype, np.floating):
         arr = (arr.clip(0, 1) * 255)
 
+    #maybe remove after checking that it's not necessary
+    # if arr.shape[-1] == 4:
+    #     arr = arr[..., :-1]
+
     return Image.fromarray(arr.astype(np.uint8)).convert('RGB')
 
 def draw_border(img, color, width):

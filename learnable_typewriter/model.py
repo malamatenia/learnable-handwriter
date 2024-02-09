@@ -33,6 +33,7 @@ class Model(Dataset):
         self.log(f'model initialized with {count_parameters(self.model)} trainable parameters')
         self.log(f'window with step of {self.model.window.w_step} and width {self.model.window.w}')
 
+
         # Info image size used in the model
         if self.unsupervised:
             assert self.model.sprites.per_character == 1
@@ -46,6 +47,7 @@ class Model(Dataset):
             return self.best_reco_loss_train
         else:
             return self.best_cer_loss_val
+    
 
     def load_from_dir(self, model_path=None, best=False, resume=None):
         if model_path is None:
@@ -117,6 +119,7 @@ class Model(Dataset):
 
         self.model.train()
         self.optimizer.zero_grad()
+        self.model.epoch = self.epoch
         y = self.model(x)
         y['loss'].backward()
         self.optimizer.step()

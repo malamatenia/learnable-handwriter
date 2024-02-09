@@ -15,7 +15,7 @@ def initialize_weights(*models):
             if isinstance(module, nn.Conv2d) or isinstance(module, nn.Linear):
                 nn.init.kaiming_normal_(module.weight)
                 if module.bias is not None:
-                    module.bias.data.zero_()
+                    module.bias.data.zero_() #manually setting them to zero otherwise they will cumulate
             elif isinstance(module, nn.BatchNorm2d):
                 module.weight.data.fill_(1)
                 module.bias.data.zero_()

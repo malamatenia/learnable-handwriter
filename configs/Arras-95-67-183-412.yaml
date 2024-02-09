@@ -1,0 +1,38 @@
+defaults:
+  - training: defaults
+  - model: defaults
+  - dataset: textualis_formata_new_clean_v2
+  - _self_
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+  verbose: False
+
+tag: Arras-95-67-183-412
+
+dataset:
+  textualis_formata_new_clean_v2:
+    supervised: True
+    starts_with: ['Arras','btv1b6000108b','btv1b90588977','btv1b8426000g','btv1b84259980']
+
+model:
+  encoder:
+    H: 96
+
+  background:
+    init:
+      constant: [0.50, 0.50, 0.50] 
+
+  loss:
+    ctc_factor: 0.01
+
+training:
+  n_workers: 8
+  batch_size: 16
+  num_epochs: 500
+  optimizer:
+    lr: 1.0e-4
+
+#python train.py Arras-95-67-183-412.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=Arras-95-67-183-412-new_clean_v2-0.1-3

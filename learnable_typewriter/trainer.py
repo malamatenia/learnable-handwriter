@@ -105,15 +105,15 @@ class Trainer(Evaluator):
         flags = self.milestone.get()
         self.compute_metrics(flags=flags)
 
-    def run_step(self, x, cur_epoch):
-        self.single_train_batch_run(x, cur_epoch)
+    def run_step(self, x):#, cur_epoch):
+        self.single_train_batch_run(x)#, cur_epoch)
 
     def save_model(self):
         self.save(epoch=self.epoch)
 
     @torch.no_grad()
     def compute_metrics(self, msg=None, flags={}):
-        if msg is not None:
+        if msg is not None: #these ones I commented out in order to apply do_milestone() to the finetuning script
             self.log(msg)
 
         if flags.get('train.reconstruction', self.train_end) and not self.evaluate_only:
@@ -160,6 +160,11 @@ class Trainer(Evaluator):
                 message = "Compute Validation losses"
                 flags = {'val.reconstruction': True, 'train.images': True}
                 self.compute_metrics(msg=message, flags=flags)
+            else:
+                self.model.epoch = self.epoch
+                if not self.model.unfrozen_sprites:
+                    print('Unfreeze')
+                    self.model.sprites.masks_.gen[-2].bias.data.fill_(5)
 
             self.log('training starts')
             torch.cuda.empty_cache()
@@ -169,7 +174,7 @@ class Trainer(Evaluator):
                 for self.batch, batch_data in pbar:
                     self.cur_iter += batch_data['x'].size()[0]
 
-                    self.run_step(batch_data, self.epoch)
+                    self.run_step(batch_data)#, self.epoch)
 
                     del batch_data
                     if self.batch%self.flush_period == 0 and self.flush_memory:

@@ -113,7 +113,7 @@ class TransformationChain(nn.Module):
         for module, activated, beta in zip(self.tsf_modules, self.activations, betas):
             if activated:
                 x = module.transform(x, beta)
-        return x
+        return x 
 
     def load_with_noise(self, tsf_seq, noise_scale):
         for k in range(self.n_tsf):

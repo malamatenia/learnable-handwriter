@@ -5,6 +5,8 @@
 scripts/train.log
 /.vscode/
 /south-north-ft/
+/notebooks/results/
+/finetune_runs/
 *-checkpoint.ipynb
 *.pyc
 trainer.log

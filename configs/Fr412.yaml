@@ -1,0 +1,38 @@
+defaults:
+  - training: defaults
+  - model: defaults
+  - dataset: textualis_formata_mask
+  - _self_
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+  verbose: False
+
+tag: fr412
+
+dataset:
+  textualis_formata_mask:
+    supervised: True
+    starts_with: 'btv1b84259980'
+
+model:
+  encoder:
+    H: 96
+
+  background:
+    init:
+      constant: [0.50, 0.50, 0.50] 
+
+  loss:
+    ctc_factor: 0.01
+
+training:
+  n_workers: 8
+  batch_size: 16
+  num_epochs: 500
+  optimizer:
+    lr: 1.0e-4
+
+#python train.py Fr412.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=Fr412-mask-0.1-3

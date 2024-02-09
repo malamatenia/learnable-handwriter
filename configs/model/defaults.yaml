@@ -24,6 +24,7 @@ sprites:
 
   use_clamp: soft
   gen_type: mlp
+  #freeze: 100 #20/12
   init:
     color:
       freeze: True 
