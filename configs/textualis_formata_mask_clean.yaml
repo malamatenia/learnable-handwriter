@@ -19,7 +19,17 @@ dataset:
 
 model:
   encoder:
-    H: 96
+    H: 96 #about resolution
+
+  sprites:
+    size:
+      - ${eval:${model.encoder.H}*3//4}
+      - ${eval:${model.encoder.H}*3//4}
+
+  transformation:
+    canvas_size:
+      - ${model.encoder.H}
+      - ${eval:${model.encoder.H}*2} #*3 *4
 
   background:
 
@@ -33,7 +43,7 @@ model:
 training:
   n_workers: 8
   batch_size: 16
-  num_epochs: 400
+  num_epochs: 600
   optimizer:
     lr: 1.0e-3
 

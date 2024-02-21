@@ -1,7 +1,7 @@
 defaults:
   - training: defaults
   - model: defaults
-  - dataset: textualis_formata_mask
+  - dataset: iwcp
   - _self_
 
 hydra:
@@ -10,12 +10,10 @@ hydra:
   output_subdir: null
   verbose: False
 
-tag: textualis_formata_mask
-
+tag: iwcp
 dataset:
-  textualis_formata_mask:
+  iwcp:
     supervised: True
-    #exclude: 'btv1b8449715t'
 
 model:
   encoder:
@@ -33,9 +31,11 @@ model:
 training:
   n_workers: 8
   batch_size: 16
-  num_epochs: 600
+  num_epochs: 500
   optimizer:
     lr: 1.0e-3
+  
+  log_every: 
+    milestone: 1
 
-# python train.py textualis_formata_mask.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.1 tag=textualis_formata_mask-0.1-3
-
+# python train.py caroline_pregothic_textualis.yaml training.optimizer.lr=1.0e-3 model.loss.ctc_factor=0.01 tag=iwcp-0.01-3

@@ -25,6 +25,7 @@ class UniDataset(Dataset): #inherits the torch Class
     crop_width: int = None
     # N_min: int = 0
     # W_max: int = float('inf')
+    annotation_path: str = None
     transcribe: dict = None
     sep: str = ''
     space: str = ' '
@@ -54,7 +55,6 @@ class UniDataset(Dataset): #inherits the torch Class
         return v
             
     def extract_post_init(self):
-
         self.data = []
         annotation = {k: self.disambiguate_line(v) for k, v in self.annotation.items()}
         
@@ -66,8 +66,13 @@ class UniDataset(Dataset): #inherits the torch Class
             return any(key.startswith(prefix) for prefix in prefixes) 
 
         for k, v in annotation.items():
-            if self.script is not None and v['script'] != self.script:
-                continue
+            try:
+                if self.script is not None and v['script'] != self.script:
+                    continue
+            except KeyError:
+                if self.script is not None and 'script' not in v:
+                    print(f"Script not found for {k}")
+
             if self.filter_by_name is not None and self.filter_by_name not in k:
                 continue
             if self.starts_with is None or starts_with_condition(k):
@@ -83,7 +88,7 @@ class UniDataset(Dataset): #inherits the torch Class
         self.disambiguation_mapping = disambiguation_mapping            
             
     def disambiguate_label(self, label):
-        return ''.join([self.disambiguation_mapping.get(c, c) for c in unicodedata.normalize('NFC', label)])
+        return ''.join([self.disambiguation_mapping.get(c, c) for c in unicodedata.normalize('NFC', label)]).strip()
 
     def split_combining_(self, v):
         label = self.process_transcription(v['label'])
@@ -94,7 +99,6 @@ class UniDataset(Dataset): #inherits the torch Class
         mapping = {a: list(unicodedata.normalize('NFD', a)) for a in self.alphabet}
         unique_combining = list(sorted(set(v for vs in mapping.values() for v in vs)))
         indexes = {c: i for i, c in enumerate(unique_combining)}
-        #print(indexes)
         return indexes
 
     @property
@@ -122,15 +126,12 @@ class UniDataset(Dataset): #inherits the torch Class
 
         # Create a new dictionary with keys as integers from matching and values as occurrences
         self.character_occurrences = {self.indexes[char]: count for char, count in self.character_counts.items()}
-        #print("Character Counts:", sorted(self.character_counts.items(), key=lambda x: x[1], reverse=True))
 
     def make_alphabet(self):
         if self.transcribe is not None:
            self.alphabet = set(self.transcribe.values())
         else:
            self.alphabet = set(l for _, sentence , _ in self.data for l in sentence)
-           
-           #print("Alphabet:", self.alphabet)
 
     def transcribe_post_init(self):
         if self.transcribe is None:
@@ -182,7 +183,6 @@ class UniDataset(Dataset): #inherits the torch Class
 
     def __getitem__(self, i):
         path, label = self.data[i]
-        #print(path, self.channels)
         x = Image.open(path).convert(self.channels)        
         x = interpolate(to_tensor(x).unsqueeze(0), size=(self.height, int(self.height * x.size[0] / x.size[1])), mode='bilinear')
         x = (255*x.squeeze(0).permute(1, 2, 0).numpy()).astype(np.uint8)
@@ -194,8 +194,11 @@ class UniDataset(Dataset): #inherits the torch Class
         return self.annotation is not None
 
     @property
-    def annotation_path(self):
-        return join(self.path, 'annotation.json')
+    def annotation_path_(self):
+        if self.annotation_path is not None:
+            return self.annotation_path
+        else:
+            return join(self.path, 'annotation.json')
 
     def process_transcription(self, raw_transcription):
         transcription = raw_transcription.replace(self.space, '')
@@ -205,7 +208,7 @@ class UniDataset(Dataset): #inherits the torch Class
 
     @property
     def annotation(self):
-        with open(self.annotation_path) as f:
+        with open(self.annotation_path_) as f:
             return json.load(f)
         
     @property
