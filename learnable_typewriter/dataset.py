@@ -98,6 +98,8 @@ class Dataset(Base):
             print(self.transcribe)
 
         self.val_flag = (sum(len(v.dataset) for v in self.val_loader) > 0 or sum(len(v.dataset) for v in self.test_loader) > 0) and self.cfg["training"].get("evaluate", {}).get("active", True)
+        if not self.val_flag:
+            self.log('Evaluation is disabled')
         self.has_labels = [getattr(self.train_loader[i].dataset, 'has_labels', True) for i in range(len(self.train_loader))]
         self.character_occurrences = self.train_loader[0].dataset.character_occurrences 
         if all(self.has_labels) != any(self.has_labels):

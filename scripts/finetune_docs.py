@@ -105,6 +105,10 @@ def finetune(trainer, max_steps, save_sprites_dir, reconstructions_path, save_mo
             loss.backward()
             trainer.optimizer.step()
 
+            if i == 1 or i == 5000 or i == 10000 or i == 20000 or i==50000 or i == 100000:
+                plot_sprites(trainer, join(save_sprites_dir, f'step_{i}'), invert_sprites=invert_sprites)
+                eval(trainer, join(reconstructions_path, f'step{i}.png'))
+
             if i == 10:
                 print('learned keys (state_dict comparison)', locate_changed_keys(parent_state_dict, cpu_clone(trainer.model.state_dict()))) #differences from initial state_dict until now
 
