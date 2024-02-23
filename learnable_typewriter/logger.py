@@ -1,5 +1,4 @@
 """Stage 2"""
-import os
 import PIL
 import numpy as np
 import torch

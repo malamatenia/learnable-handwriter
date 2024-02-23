@@ -3,7 +3,6 @@ from shutil import copyfile
 from os.path import join
 from time import time
 from collections import defaultdict
-from tqdm import tqdm
 
 import torch
 from learnable_typewriter.utils.defaults import MODEL_FILE, BEST_MODEL
@@ -33,7 +32,6 @@ class Model(Dataset):
         self.log(f'model initialized with {count_parameters(self.model)} trainable parameters')
         self.log(f'window with step of {self.model.window.w_step} and width {self.model.window.w}')
 
-
         # Info image size used in the model
         if self.unsupervised:
             assert self.model.sprites.per_character == 1
@@ -47,7 +45,6 @@ class Model(Dataset):
             return self.best_reco_loss_train
         else:
             return self.best_cer_loss_val
-    
 
     def load_from_dir(self, model_path=None, best=False, resume=None):
         if model_path is None:

@@ -1,13 +1,6 @@
 """Stage 1"""
 import torch
-import os
-from os.path import dirname, abspath, join
-import sys
-import json
-import PIL
 from itertools import chain
-from tqdm import trange, tqdm
-
 
 from learnable_typewriter.utils.generic import use_seed, alternate
 from learnable_typewriter.typewriter.optim.optimizer import get_optimizer
@@ -105,8 +98,8 @@ class Trainer(Evaluator):
         flags = self.milestone.get()
         self.compute_metrics(flags=flags)
 
-    def run_step(self, x):#, cur_epoch):
-        self.single_train_batch_run(x)#, cur_epoch)
+    def run_step(self, x):
+        self.single_train_batch_run(x)
 
     def save_model(self):
         self.save(epoch=self.epoch)

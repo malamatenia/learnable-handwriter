@@ -2,20 +2,17 @@ import os
 import sys
 import json
 import PIL
-from PIL import Image
-from tqdm import trange, tqdm
+from tqdm import tqdm
 from os.path import dirname, abspath, join
 from collections import defaultdict
+from finetune_scripts import check_patch
 
 import torch
-import numpy as np
 from torchvision.transforms import ToPILImage
 LIB_PATH = join(dirname(dirname(abspath(__file__))))
 sys.path.append(LIB_PATH)
 from learnable_typewriter.utils.loading import load_pretrained_model
 from torchvision.utils import make_grid
-import plotly.express as px
-import pandas as pd
 
 def cpu_clone(sd):
     return {k: torch.clone(v.cpu()) for k, v in sd.items()}
@@ -167,6 +164,8 @@ def run(args):
             k['path'] = args.data_path
             k['annotation_path'] = args.annotation_file
 
+        # TODO uncomment this line when the patch is ready
+        # check_patch(trainer, split) 
         trainer.val_loader, trainer.test_loader = [], []
         finetune(trainer, max_steps=args.max_steps, save_sprites_dir=join(args.output_path, document, args.sprites_path), reconstructions_path=join(args.output_path, document, args.reconstructions_path), save_model_dir=join(args.output_path, 'models', f'{document}.pth'), invert_sprites=args.invert_sprites, split=split)
         torch.cuda.empty_cache()

@@ -94,7 +94,6 @@ class Sprites(nn.Module):
         self.masks_ = Generator(self.n_sprites*self.per_character, self.sprite_size, type=cfg['gen_type'], logger=logger)
         self.frozen = False
 
-
         self.active_prototypes = ones(len(self))
         self.clamp_func = get_clamp_func(cfg['use_clamp'])
 
