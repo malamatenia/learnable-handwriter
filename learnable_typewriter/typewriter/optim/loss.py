@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-from learnable_typewriter.utils.image import to_three
 
 class CTC(torch.nn.Module):
     def __init__(self, blank, zero_infinity=True, reduction='mean'):

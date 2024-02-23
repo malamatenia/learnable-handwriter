@@ -122,6 +122,53 @@ def make_optimizer_conf(args):
         }
     return conf    
 
+import unicodedata
+def make_factoring(alphabet, matching): #creates a matrix with the alphabet and the combining characters
+    mapping = {a: list(unicodedata.normalize('NFD', a)) for a in alphabet}
+    unique_combining = list(sorted(set(v for vs in mapping.values() for v in vs)))
+    return unique_combining
+
+def check_patch(trainer, split):
+    try:
+        get_loader(trainer, split)
+        # if the dictionary differs this error will pop. Then we will need to patch the trainer.
+    except Exception as e:
+        # TODO find which type of exception this is and catch that and only that.
+        print('Patching trainer because of dictionary mismatch:', e)
+
+        # step 1: extract all metadata related to old dictionary and delete it from trainer
+        matching_old = {v: k for k, v in trainer.transcribe_dataset.items()}
+        alphabet_old = set(matching_old.keys())
+        unique_combining_old = {v: i for i, v in enumerate(make_factoring(alphabet_old, matching_old))}
+
+        # step 2: initialize dataset in trainer.
+        trainer.get_dataset(trainer.dataset_kwargs[0], (split if split == 'all' else split))
+        matching = {v: k for k, v in trainer.transcribe_dataset.items()}
+        alphabet = set(matching.keys())
+        unique_combining = {v: i for i, v in enumerate(make_factoring(alphabet, matching))}
+
+        # step 3: Compute matching between old and new alphabet
+        # find the the keys that are in both unique combining and unique combining old and connect the new index to old index
+        common_keys = set(unique_combining.keys()).intersection(set(unique_combining_old.keys()))
+        new_to_old_common_sprites = {unique_combining[k]: unique_combining_old[k] for k in common_keys}
+
+        # step 4: shift the order of latents in g_theta to obey the new dictionary and reinitialize the rest
+        # extract the old sprites from g_theta
+        old_sprites = trainer.model.sprites.masks_.proto.data
+
+        # init everything to rand
+        trainer.model.sprites.masks_.proto.data = torch.rand((len(alphabet), 1, *old_sprites.shape[-2:]), device=old_sprites.device)
+
+        # copy the old sprites to the new ones
+        for k, v in new_to_old_common_sprites.items():
+            trainer.model.sprites.masks_.proto.data[k] = old_sprites[v]
+
+        # recompute the blank
+        trainer.model.blank = len(alphabet)
+        if trainer.model.loss.ctc_factor > 0:
+            from learnable_typewriter.typewriter.optim.loss import CTC
+            trainer.model.loss.ctc = CTC(blank=trainer.model.blank)
+
 def run(args):
     os.makedirs(join(args.output_path, args.sprites_path), exist_ok=True)
     pbar = tqdm(args.script)
@@ -140,6 +187,8 @@ def run(args):
             k['path'] = args.data_path
             k['annotation_path'] = args.annotation_file
 
+        # TODO uncomment this line when the patch is ready
+        # check_patch(trainer, args.split) 
         trainer.val_loader, trainer.test_loader = [], []
         finetune(trainer, max_steps=args.max_steps, save_sprites_dir=join(args.output_path, document, args.sprites_path), save_model_dir=join(args.output_path, 'models', f'{document}.pth'), reconstructions_path=join(args.output_path, document, args.reconstructions_path), invert_sprites=args.invert_sprites, split=args.split)
         torch.cuda.empty_cache()

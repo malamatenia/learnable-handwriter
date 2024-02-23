@@ -4,7 +4,6 @@ from os.path import join, isdir
 from functools import partial
 from omegaconf.listconfig import ListConfig
 
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
