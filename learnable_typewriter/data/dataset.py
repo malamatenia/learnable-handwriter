@@ -141,7 +141,7 @@ class UniDataset(Dataset): #inherits the torch Class
 
     def split_it(self):
         base_path = os.path.join(self.path, 'images')  # Base path where all the folders are
-        self.data = [(self.get_path(base_path, path), label) for (path, label, split) in self.data if split == self.split]
+        self.data = [(self.get_path(base_path, path), label) for (path, label, split) in self.data if (self.split == 'all' or split == self.split)]
 
     def get_path(self, base_path, path):
         filename = os.path.basename(path)  # Get the filename from the provided path

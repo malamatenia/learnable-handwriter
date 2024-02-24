@@ -31,7 +31,7 @@ model:
 training:
   n_workers: 8
   batch_size: 16
-  num_epochs: 500
+  num_epochs: 300
   optimizer:
     lr: 1.0e-3
   

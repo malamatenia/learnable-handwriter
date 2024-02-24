@@ -94,7 +94,7 @@ class Dataset(Base):
         
         if self.supervised:
             self.log('Number of sprites : {}'.format(len(self.transcribe)))
-            print(self.transcribe)
+            self.log('Transcribe loaded dataset : {}'.format(self.transcribe))
 
         self.val_flag = (sum(len(v.dataset) for v in self.val_loader) > 0 or sum(len(v.dataset) for v in self.test_loader) > 0) and self.cfg["training"].get("evaluate", {}).get("active", True)
         if not self.val_flag:
@@ -116,13 +116,14 @@ class Dataset(Base):
     def img_size(self):
         self.img_size = self.train_loader.dataset.img_size
 
-    def get_dataset(self, dataset_args, split, dataset_size=None):
+    def get_dataset(self, dataset_args, split, dataset_size=None, force=False):
         has_transcribe = 'transcribe_dataset' in self.__dict__
         transcribe = (self.transcribe_dataset if has_transcribe else None)
         dataset = UniDataset(split=split, height=self.height, transcribe=transcribe, **dataset_args)
 
         if not has_transcribe:
-            assert split == 'train'
+            if not force:
+                assert split == 'train'
             self.transcribe_dataset = dataset.transcribe
             if self.supervised:
                 self.transcribe = self.transcribe_dataset

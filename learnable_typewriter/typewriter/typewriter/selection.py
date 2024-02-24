@@ -32,12 +32,15 @@ class Selection(nn.Module):
 
         self.norm = np.sqrt(self.dim_z)
         self.group, self.log_softmax = group, (self.log_softmax_group if group > 1 else self.log_softmax_)
+        self.register_buffer('factoring', self.init_factoring(factoring)) # |A| times |c|
+
+    def init_factoring(self, factoring):
         assert factoring is not None, "for none factoring not implemented yet"
         factoring = torch.from_numpy(factoring).to(self.blank_latent.dtype)
         factoring = torch.cat([factoring, torch.zeros((1, factoring.shape[1]), dtype=factoring.dtype)], dim=0)
         factoring = torch.cat([factoring, torch.zeros((factoring.shape[0], 1), dtype=factoring.dtype)], dim=1)
         factoring[-1, -1] = 1
-        self.register_buffer('factoring', factoring) # |A| times |c|
+        return factoring
 
     def encoder_params(self):
         return self.anchors.parameters()

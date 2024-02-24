@@ -87,8 +87,7 @@ class Sprites(nn.Module):
         self.sprite_size = cfg['size']
         self.proto_init = cfg['init']['color']
         self.color_channels = cfg['color_channels']
-        samples = init_objects(self.n_sprites*self.per_character, self.color_channels, self.sprite_size, self.proto_init)
-        self.prototypes = nn.Parameter(samples)
+        self.prototypes = nn.Parameter(self.init_proto(self.n_sprites*self.per_character))
         self.prototypes.requires_grad = False
 
         self.masks_ = Generator(self.n_sprites*self.per_character, self.sprite_size, type=cfg['gen_type'], logger=logger)
@@ -96,6 +95,9 @@ class Sprites(nn.Module):
 
         self.active_prototypes = ones(len(self))
         self.clamp_func = get_clamp_func(cfg['use_clamp'])
+
+    def init_proto(self, num_proto):
+        return init_objects(num_proto, self.color_channels, self.sprite_size, self.proto_init)
 
     def __len__(self):
         return self.n_sprites*self.per_character
