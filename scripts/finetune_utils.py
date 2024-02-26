@@ -158,6 +158,7 @@ def make_optimizer_conf(args):
     if args.mode == "sprites":
         conf["training"] = {
                 "optimizer": {
+                    "name": args.opt,
                     "lr": 0,
                     "prototypes": {   
                         "lr": args.lr
@@ -168,16 +169,17 @@ def make_optimizer_conf(args):
     elif args.mode == "g_theta" or args.mode == "g_theta+bkg":
         conf["training"] = {
             "optimizer": {
-                "name": "adam",
+                "name": args.opt,
                 "lr": args.lr,
                 "finetune": args.mode
             }
         }
-        conf["model"] = {
-            "loss": {
-                "ctc_factor": 0.0
-            }
+
+    conf["model"] = {
+        "loss": {
+            "ctc_factor": 0.0
         }
+    }
     return conf
 
 def make_factoring(alphabet): #creates a matrix with the alphabet and the combining characters
@@ -204,5 +206,6 @@ def get_parser(name):
     parser.add_argument("--device", default=0, type=str)
     parser.add_argument("--lr", default=0.0001, type=float)
     parser.add_argument("--split", choices=['train', 'val', 'all'], type=str, required=True)
+    parser.add_argument("--opt", choices=['adam', 'sgd'], default='adam', type=str)
     
     return parser
