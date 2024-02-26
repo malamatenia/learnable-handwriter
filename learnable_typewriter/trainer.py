@@ -55,11 +55,10 @@ class Trainer(Evaluator):
         opt_params = dict(self.cfg["training"]["optimizer"]) or {}
         optimizer_name = opt_params.pop("name")
         finetune_mode = opt_params.pop('finetune', '')
+        prototypes_kwargs = opt_params.pop('prototypes', {})
+        tsf_kwargs = opt_params.pop('transformation', {})
+        encoder_kwargs = opt_params.pop('encoder', {})
         if finetune_mode == '':
-            prototypes_kwargs = opt_params.pop('prototypes', {})
-            tsf_kwargs = opt_params.pop('transformation', {})
-            encoder_kwargs = opt_params.pop('encoder', {})
-
             self.optimizer = get_optimizer(optimizer_name)([
                 dict(params=self.model.prototypes_parameters(), **prototypes_kwargs),
                 dict(params=self.model.transformation_parameters(), **tsf_kwargs),
