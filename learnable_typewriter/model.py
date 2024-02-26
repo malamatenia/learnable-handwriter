@@ -91,14 +91,16 @@ class Model(Dataset):
         ###########################
 
         if resume:
+            self.log('Resuming optimizer state for training.')
+            print('Resuming optimizer state for training.')
             self.start_epoch = checkpoint["epoch"]
             if 'best_metric' in checkpoint:
                 if self.unsupervised:
                     self.best_reco_loss_train = checkpoint["best_metric"]
                 else:
                     self.best_cer_loss_val = checkpoint["best_metric"]
-            # ideally we should also compute for the best metric if not already 
 
+            # ideally we should also compute for the best metric if not already computed
             self.optimizer.load_state_dict(checkpoint["optimizer_state"])
             self.epoch = self.start_epoch
             self.batch = checkpoint.get("batch", 0)
@@ -130,7 +132,8 @@ class Model(Dataset):
         self.train_metrics[x['alias']].update(metrics)
 
     def step(self):
-        self.epoch += 1  # The cur_epoch is starting from 0 whereas in the trainer it is starting from 1
+        # The cur_epoch is starting from 0 whereas in the trainer it is starting from 1
+        self.epoch += 1
         self.model.step()
 
     @torch.no_grad()
