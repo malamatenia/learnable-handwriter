@@ -52,9 +52,11 @@ class LearnableTypewriter(nn.Module):
         self.encoder = Encoder(self.cfg['encoder'])
         self.window = Window(self.encoder, self.cfg['window'])
         self.sprites = Sprites(self.cfg['sprites'], logger)
+
         self.background = Background(self.cfg['background'])
         self.selection = Selection(self.encoder.out_ch, self.sprites.masks_.latent_dim, self.sprites.per_character, self.factoring, logger)
         if self.background:
+            # TODO remove this and refactor as in the new ltw
             self.background_transformation = Transformation(self, 1, self.cfg['transformation']['background'], background=True)
             self.register_buffer('beta_bkg', torch.cat([torch.eye(2, 2), torch.zeros((2, 1))], dim=-1).unsqueeze(0))
 
@@ -65,7 +67,7 @@ class LearnableTypewriter(nn.Module):
         self.debug = False
 
         self.freeze_milestone = cfg['sprites'].get('freeze', 0)
-        print(f'freeze_milestone = {self.freeze_milestone}')
+        self.log(f'freeze_milestone = {self.freeze_milestone}')
         self.epoch = None
         
 
@@ -108,7 +110,7 @@ class LearnableTypewriter(nn.Module):
 
         if return_params:
             y['params'] = xr['params']
-        
+
         return y
 
     def predict_parameters(self, x, features):

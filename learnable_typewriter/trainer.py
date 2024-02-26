@@ -65,17 +65,18 @@ class Trainer(Evaluator):
                 dict(params=self.model.transformation_parameters(), **tsf_kwargs),
                 dict(params=chain(self.model.encoder.parameters(), self.model.selection.sprite_params(), self.model.selection.encoder_params()), **encoder_kwargs)],
                 **opt_params)
-        elif finetune_mode == 'g_theta':
-            #print('Finetune G_theta')
-            opt_params.pop('prototypes', {})
-            opt_params.pop('transformation', {})
-            opt_params.pop('encoder', {})
-            self.optimizer = get_optimizer(optimizer_name)(self.model.sprites.masks_.gen.parameters(), **opt_params) #G_theta
+        elif finetune_mode in {'g_theta', 'g_theta+bkg'}:
+            self.log(f'Finetuning {finetune_mode}.', eval=True)
+            if finetune_mode == 'g_theta':
+                self.optimizer = get_optimizer(optimizer_name)(self.model.sprites.masks_.gen.parameters(), **opt_params) #G_theta
+            else:
+                self.optimizer = get_optimizer(optimizer_name)(params=chain(self.model.sprites.masks_.gen.parameters(), self.model.background_transformation.parameters()), **opt_params) #G_theta
         else:
             raise NotImplementedError(f'finetune_mode = {finetune_mode}')
 
+        #TODO maybe remove this and refactor
         self.model.set_optimizer(self.optimizer)
-        self.log("Optimizer:\n" + str(self.optimizer))
+        self.log("Optimizer:\n" + str(self.optimizer), eval=True)
 
     def __init_milestone__(self):
         events = {}
@@ -88,6 +89,7 @@ class Trainer(Evaluator):
         self.milestone = Milestone(self.log_cfg['milestone'], events=events)
 
     def __resume__(self, best=False):
+        #TODO refactor make sure optimizer is not loaded except if explicitly stated
         checkpoint_path_resume = self.cfg["training"].get("pretrained")
         if checkpoint_path_resume is not None:
             print('Load previous checkpoint:', checkpoint_path_resume)

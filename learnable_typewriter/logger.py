@@ -9,10 +9,10 @@ from learnable_typewriter.utils.generic import nonce, cfg_flatten, add_nest
 from learnable_typewriter.utils.image import img, to_three
 import wandb
 
-
 from PIL import ImageFont, ImageDraw, Image
 from os.path import dirname, join
 FONT = join(dirname(dirname(__file__)), '.media', 'Junicode.ttf')
+
 
 def get_size(text, font):
     image = Image.new('RGB', (500, 500), color = (255, 255, 255))

@@ -104,6 +104,4 @@ class Sprites(nn.Module):
 
     @property
     def masks(self): 
-        masks = self.masks_()
-        return self.clamp_func(masks) if self.training else self.clamp_func(masks) #now it uses clamp even in training
-
+        return self.clamp_func(self.masks_()) #TODO maybe useless?
