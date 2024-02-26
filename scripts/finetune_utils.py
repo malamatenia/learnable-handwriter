@@ -160,7 +160,7 @@ def make_optimizer_conf(args):
                 "optimizer": {
                     "lr": 0,
                     "prototypes": {   
-                        "lr": 0.0001
+                        "lr": args.lr
                     },
                     "encoder": {'weight_decay': 0}
                 }
@@ -169,7 +169,7 @@ def make_optimizer_conf(args):
         conf["training"] = {
             "optimizer": {
                 "name": "adam",
-                "lr": 0.0001,
+                "lr": args.lr,
                 "finetune": args.mode
             }
         }
@@ -202,6 +202,7 @@ def get_parser(name):
     parser.add_argument("--invert_sprites", action='store_true')
     parser.add_argument("--enable_experimental", action='store_true')
     parser.add_argument("--device", default=0, type=str)
+    parser.add_argument("--lr", default=0.0001, type=float)
     parser.add_argument("--split", choices=['train', 'val', 'all'], type=str, required=True)
     
     return parser
