@@ -184,7 +184,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', "--sprites_path", default='sprites', type=str)
     parser.add_argument('-d', "--data_path", type=str, required=True)
     parser.add_argument('-a', "--annotation_file", required=True, default=join(LIB_PATH, 'datasets/south_north_textualis_mask/annotation.json'), type=str)
-    parser.add_argument("--max_steps", required=False, default=2500, type=int)
+    parser.add_argument("--max_steps", required=False, default=2000, type=int)
     parser.add_argument("--log_every", required=False, default=500, type=int)
     parser.add_argument("--mode", choices=["all", "sprites", "g_theta"], default='g_theta')
     parser.add_argument("--invert_sprites", action='store_true')
