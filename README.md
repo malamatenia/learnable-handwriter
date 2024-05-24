@@ -104,7 +104,7 @@ tensorboard --logdir ./<run_dir>/
 
 ```bibtex
 @misc{the-learnable-scriber,
-	title = {The Learnable Typewriter: A Generative Approach to Text Line Analysis},
+	title = {An Interpretable Deep Learning Approach for Morphological Script Type Analysis},
 	author = {Vlachou-Efstathiou, Malamatenia and Siglidis, Ioannis and Stutzmann, Dominique, and Aubry, Mathieu},
 	publisher = {arXiv},
 	year = {2024},
