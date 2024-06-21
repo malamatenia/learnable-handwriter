@@ -12,13 +12,13 @@ conda activate ltw
 python -m pip install -r requirements.txt
 ```
 
-### Datasets :sunny: Models :inbox_tray: (MV: adjust this to my data)
+### Datasets :sunny: Models :inbox_tray:
 Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/cwrfg1hr6uv5t5fvponjq/datasets.zip?rlkey=hhkxm58z32r9kq159xr1jc9xi&st=q1xms5t9&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/ig09bcl5v0bm8e0h9we1k/runs.zip?rlkey=zfffwvp4w4m1ssqb8w6qqy55u&st=z6izmb9i&dl=0) in the parent folder.
 
 ## Inference :peach:
 For minimal inference from pre-trained models and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) (MV: in construction)
 
-Helper scripts are also provided to produce the paper figures :
+A notebook is also provided to produce the paper results and graphs:
  *add a notebook solely for the graph figures*
 
 ## Training :blossom:
@@ -47,19 +47,29 @@ python scripts/finetune_docs.py -i runs/iwcp_south_north/iwcp-south-north-0.01-4
 
 > To all of the above experiment config files, additional command line overrides could be applied to further modify them using the [hydra syntax](https://hydra.cc/docs/advanced/override_grammar/basic/).
 
-### Custom Dataset :floppy_disk:
-Trying the LT on a new dataset is dead easy.
+### Custom Dataset :books:
+Trying the Learnable Scriber on a new dataset, assuming that it consists of a parent folder with subfolders per document : 
 
-First create a config file:
+First create a first config file for the dataset:
 
 ```
-configs/<DATASET_ID>.yaml
+configs/dataset/<DATASET_ID>.yaml
 ...
 
 DATASET-TAG:
   path: <DATASET-NAME>/
   sep: ''                    # How the character separator is denoted in the annotation. 
   space: ' '                 # How the space is denoted in the annotation.
+```
+
+then a second one setting the hyperparameters: 
+
+```
+configs/<DATASET_ID>.yaml
+...
+
+For its structure, see the config file provided for our experiment.
+
 ```
 
 Then create the dataset folder:
@@ -84,8 +94,10 @@ The annotation.json file should be a dictionary with entries of the form:
 
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
-### Logging :chart_with_downwards_trend: MV: adjust this also for wandb 
-Logging is done through tensorboard. To visualize results run:
+### Logging :chart_with_downwards_trend:
+Logging is done through wandb, and the link is provided directly when training. 
+
+To visualize results with tensorboard run:
 
 ```bash
 tensorboard --logdir ./<run_dir>/
