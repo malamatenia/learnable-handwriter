@@ -12,3 +12,5 @@ scripts/train.log
 trainer.log
 .ipynb_checkpoints
 train.log
+/junicode-1.002/
+/evaluate-ssim-emd/
