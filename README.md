@@ -5,30 +5,21 @@ Github repository of the [An Interpretable Deep Learning Approach for Morphologi
 Authors: Malamatenia Vlachou, [Yannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://cv.hal.science/dominique-stutzmann), [Mathieu Aubry](http://imagine.enpc.fr/~aubrym/).  
 Research Institute: [IRHT](), (https://www.irht.cnrs.fr/), _Institut de Recherche et d'Histoire des Textes, CNRS_, [Imagine](https://imagine.enpc.fr/), _LIGM, Ecole des Ponts, Univ Gustave Eiffel, CNRS, Marne-la-Vallée, France_
 
-## Install :seedling:
+## Install :rocket:
 ```shell
 conda create --name ltw pytorch==1.9.1 torchvision==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
 conda activate ltw
 python -m pip install -r requirements.txt
 ```
 
-### Datasets :sunny: Models :hammer: (MV: adjust this to my data)
-Download & extract [datasets.zip](https://www.dropbox.com/s/0fa9hcbfu9vr3t2/datasets.zip?dl=0) and [runs.zip](https://www.dropbox.com/s/c4c7lbp1ydqs9dj/runs.zip?dl=0) in the parent folder.
+### Datasets :sunny: Models :inbox_tray: (MV: adjust this to my data)
+Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/cwrfg1hr6uv5t5fvponjq/datasets.zip?rlkey=hhkxm58z32r9kq159xr1jc9xi&st=q1xms5t9&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/ig09bcl5v0bm8e0h9we1k/runs.zip?rlkey=zfffwvp4w4m1ssqb8w6qqy55u&st=z6izmb9i&dl=0) in the parent folder.
 
 ## Inference :peach:
-For minimal inference and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) (MV: in construction)
+For minimal inference from pre-trained models and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) (MV: in construction)
 
-Helper scripts are also provided to perform evaluation on the corresponding datasets:
-
-```python
-python scripts/eval.py -i <MODEL-PATH> {--eval, --eval_best}
-```
-
-and produce figures and sprites for certain samples:
-
-```python
-python scripts/eval.py -i <MODEL-PATH> -s {train, val, test} -id 0 0 0 -is 1 2 3 --plot_sprites
-```
+Helper scripts are also provided to produce the paper figures :
+ *add a notebook solely for the graph figures*
 
 ## Training :blossom:
 Training and model configure is performed though hydra.
