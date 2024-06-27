@@ -15,12 +15,23 @@ dataset:
   iwcp_south_north:
     supervised: True
 
+    # Optional arguments: 
+    # startswith: str or list of str
+    # exclude: str or list of str,
+    # For selecting to train on or exclude a subgroup of the dataset respectively
+    #
+    # where 'str' contains an id which corresponds to the field before the first "_" of the training images, 
+    # e.g. for bnflat1_00001_00001.png, id is bnflat1
+    # so 
+    #startswith: 'bnf' would select only this group for the training
+    #and 
+    # exclude: 'bnf1','bnf2' would exclude the associated textlines from the training
+
 model:
   encoder:
     H: 96
 
   background:
-
     init:
       constant: [0.5, 0.5, 0.5]    
 
@@ -37,4 +48,4 @@ training:
   log_every: 
     milestone: 1
 
-# python train.py iwcp_south_north.yaml training.optimizer.lr=1.0e-4 model.loss.ctc_factor=0.01 tag=iwcp-south-north-0.01-4
+# python train.py iwcp_south_north.yaml tag=iwcp-south-north-0.01-4
