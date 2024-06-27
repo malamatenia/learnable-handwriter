@@ -1,0 +1,5 @@
+iwcp_south_north:
+  path: iwcp_south_north/
+  sep: ''
+  space: ' '
+  p: 0
