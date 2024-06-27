@@ -5,6 +5,16 @@ Github repository of the [An Interpretable Deep Learning Approach for Morphologi
 Authors: Malamatenia Vlachou, [Yannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://cv.hal.science/dominique-stutzmann), [Mathieu Aubry](http://imagine.enpc.fr/~aubrym/).  
 Research Institute: [IRHT](), (https://www.irht.cnrs.fr/), _Institut de Recherche et d'Histoire des Textes, CNRS_, [Imagine](https://imagine.enpc.fr/), _LIGM, Ecole des Ponts, Univ Gustave Eiffel, CNRS, Marne-la-Vallée, France_
 
+
+### Datasets and Models :inbox_tray: for Southern and Northern _Textualis_ 📜
+Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/cwrfg1hr6uv5t5fvponjq/datasets.zip?rlkey=hhkxm58z32r9kq159xr1jc9xi&st=q1xms5t9&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/ig09bcl5v0bm8e0h9we1k/runs.zip?rlkey=zfffwvp4w4m1ssqb8w6qqy55u&st=z6izmb9i&dl=0) in the parent folder.
+
+### Inference and Paper figures :bar_chart:
+For minimal inference from pre-trained models and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) (MV: in construction)
+
+A notebook is also provided to produce the paper results and graphs:
+ *add a notebook solely for the graph figures*
+
 ## Install :rocket:
 ```shell
 conda create --name ltw pytorch==1.9.1 torchvision==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
@@ -12,43 +22,32 @@ conda activate ltw
 python -m pip install -r requirements.txt
 ```
 
-### Datasets :sunny: Models :inbox_tray:
-Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/cwrfg1hr6uv5t5fvponjq/datasets.zip?rlkey=hhkxm58z32r9kq159xr1jc9xi&st=q1xms5t9&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/ig09bcl5v0bm8e0h9we1k/runs.zip?rlkey=zfffwvp4w4m1ssqb8w6qqy55u&st=z6izmb9i&dl=0) in the parent folder.
-
-## Inference :peach:
-For minimal inference from pre-trained models and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) (MV: in construction)
-
-A notebook is also provided to produce the paper results and graphs:
- *add a notebook solely for the graph figures*
-
 ## Training :blossom:
 Training and model configure is performed though hydra.
-We supply the corresponding config files for all our baseline experiments.
+We supply the corresponding config files for our experiment.
 
-
-### Southern and Northern _Textualis_ 📜:
 ```python
-python scripts/train.py iwcp_south_north.yaml
+python scripts/train.py <CONFIG_NAME>.yaml
 ```
 
-and finetune script types with:
+and finetune on a group/script level with:
 
 ```python
-python scripts/finetune_script.py -i fontenay/fontenay/<MODEL_NAME> -o fontenay/fontenay-ft/ --max_epochs 150 -k "training.optimizer.lr=0.001"
 
-python scripts/finetune_scripts.py -i runs/iwcp_south_north/iwcp-south-north-0.01-4/2024-02-26_11-32-17/ -o finetune_runs/iwcp_south-north_scripts --max_steps 2500 --script Northern_Textualis Southern_Textualis --mode g_theta --invert_sprites --annotation_file 'datasets/iwcp_south_north/annotation.json' -d datasets/iwcp/ --split train
+python scripts/finetune_scripts.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites --script '<SCRIPT_NAME>' -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
 ```
 
-and documents with: 
+and individual documents with: 
 
 ```python
-python scripts/finetune_docs.py -i runs/iwcp_south_north/iwcp-south-north-0.01-4/2024-02-26_11-32-17/ -o finetune_runs/iwcp_south_north_individual/ --mode g_theta --invert_sprites -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --max_steps 2500 --split all
+python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
 ```
 
 > To all of the above experiment config files, additional command line overrides could be applied to further modify them using the [hydra syntax](https://hydra.cc/docs/advanced/override_grammar/basic/).
 
+
 ### Custom Dataset :books:
-Trying the Learnable Scriber on a new dataset, assuming that it consists of a parent folder with subfolders per document : 
+Trying the Learnable Scriber on a new dataset, assuming that it consists of a parent dataset folder with or without subfolders per document : 
 
 First create a first config file for the dataset:
 
@@ -68,7 +67,7 @@ then a second one setting the hyperparameters:
 configs/<DATASET_ID>.yaml
 ...
 
-For its structure, see the config file provided for our experiment.
+For its structure, see the config file provided for our experiment with additional information.
 
 ```
 
@@ -88,22 +87,29 @@ The annotation.json file should be a dictionary with entries of the form:
     "<image_id>": {
         "split": "train",                            # {"train", "val", "test"} - "val" is ignored in the unsupervised case.
         "label": "A beautiful calico cat."           # The text that corresponds to this line.
-        "script": " Southern_Textualis"             # Corresponds to the script type of the image
+        "script": "Times_New_Roman"                  # Corresponds to the script type of the image
     },
 ```
 
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
-### Logging :chart_with_downwards_trend:
-Logging is done through wandb, and the link is provided directly when training. 
+### Filter/Normalize transcriptions :soap:
 
-To visualize results with tensorboard run:
+We implement [choco-mufin](https://github.com/PonteIneptique/choco-mufin) when loading the dataset, using a disambiguation-table.csv to normalize or exclude characters from our annotations. This creates a consistent set of characters for analysis regardless of the annotation source. The current normalization suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic approach. For more details see [the associated article](https://openhumanitiesdata.metajnl.com/articles/10.5334/johd.97). You can modify this per your needs.
+
+Additionally, the data loader performs an [NFD normalization](https://fr.wikipedia.org/wiki/Normalisation_Unicode#NFD) when selecting the character vocabulary. This ensures that modifier characters, such as abbreviation tildes, are separated from the base letter and considered as separate characters when creating the prototypes.
+
+
+### Logging :chart_with_downwards_trend:
+Logging is done through wandb, and the link is provided directly upon training.
+
+Alternatively, to visualize results with tensorboard run:
 
 ```bash
 tensorboard --logdir ./<run_dir>/
 ```
 
-### Citing :dizzy: MV: add this part 
+### Citing :dizzy:
 
 ```bibtex
 @misc{the-learnable-scriber,
