@@ -1,9 +1,11 @@
-![LTW_graph.png](./.media/LTW_graph.png)
+
 
 # The Learnable Scriber <br><sub>An adaptation of the [Learnable Typewriter](https://github.com/ysig/learnable-typewriter) for morphological script type analysis</sub>
 Github repository of the [An Interpretable Deep Learning Approach for Morphological Script Type Analysis] (add paper on arXiv or webpage).  
 Authors: Malamatenia Vlachou, [Yannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://cv.hal.science/dominique-stutzmann), [Mathieu Aubry](http://imagine.enpc.fr/~aubrym/).  
 Research Institute: [IRHT](), (https://www.irht.cnrs.fr/), _Institut de Recherche et d'Histoire des Textes, CNRS_, [Imagine](https://imagine.enpc.fr/), _LIGM, Ecole des Ponts, Univ Gustave Eiffel, CNRS, Marne-la-Vallée, France_
+
+![LTW_graph.png](./.media/LTW_graph.png)
 
 
 ### Datasets and Models :inbox_tray: for Southern and Northern _Textualis_ 📜
