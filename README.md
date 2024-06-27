@@ -22,29 +22,6 @@ conda activate ltw
 python -m pip install -r requirements.txt
 ```
 
-## Training :blossom:
-Training and model configure is performed though hydra.
-We supply the corresponding config files for our experiment.
-
-```python
-python scripts/train.py <CONFIG_NAME>.yaml
-```
-
-and finetune on a group/script level with:
-
-```python
-
-python scripts/finetune_scripts.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites --script '<SCRIPT_NAME>' -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
-```
-
-and individual documents with: 
-
-```python
-python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
-```
-
-> To all of the above experiment config files, additional command line overrides could be applied to further modify them using the [hydra syntax](https://hydra.cc/docs/advanced/override_grammar/basic/).
-
 
 ### Custom Dataset :books:
 Trying the Learnable Scriber on a new dataset, assuming that it consists of a parent dataset folder with or without subfolders per document : 
@@ -98,6 +75,29 @@ You can completely ignore the annotation.json file in the case of unsupervised t
 We implement [choco-mufin](https://github.com/PonteIneptique/choco-mufin) when loading the dataset, using a disambiguation-table.csv to normalize or exclude characters from our annotations. This creates a consistent set of characters for analysis regardless of the annotation source. The current normalization suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic approach. For more details see [the associated article](https://openhumanitiesdata.metajnl.com/articles/10.5334/johd.97). You can modify this per your needs.
 
 Additionally, the data loader performs an [NFD normalization](https://fr.wikipedia.org/wiki/Normalisation_Unicode#NFD) when selecting the character vocabulary. This ensures that modifier characters, such as abbreviation tildes, are separated from the base letter and considered as separate characters when creating the prototypes.
+
+## Training  :seedling: and Finetuning :herb:
+Training and model configure is performed though hydra.
+We supply the corresponding config files for our experiment.
+
+```python
+python scripts/train.py <CONFIG_NAME>.yaml
+```
+
+and finetune on a group/script level with:
+
+```python
+
+python scripts/finetune_scripts.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites --script '<SCRIPT_NAME>' -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
+```
+
+and individual documents with: 
+
+```python
+python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
+```
+
+> To all of the above experiment config files, additional command line overrides could be applied to further modify them using the [hydra syntax](https://hydra.cc/docs/advanced/override_grammar/basic/).
 
 
 ### Logging :chart_with_downwards_trend:
