@@ -5,7 +5,7 @@ import PIL
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from os.path import dirname, abspath, join
+from os.path import dirname, abspath, join, isfile
 
 import torch
 LIB_PATH = join(dirname(dirname(abspath(__file__))))
@@ -67,6 +67,12 @@ def run(args):
     os.makedirs(join(args.output_path, 'models'), exist_ok=True)
     for document in pbar:
         pbar.set_description(f"Processing {document}")
+
+        # Skip if document already exists
+        if isfile(join(args.output_path, 'models', f'{document}.pth')):
+            print(f"Document {document} already exists. Skipping...")
+            continue
+
         trainer = load_pretrained_model(path=args.model_path, device=str(args.device), conf=make_optimizer_conf(args))
 
         os.makedirs(join(args.output_path, args.sprites_path, 'transcribe'), exist_ok=True)

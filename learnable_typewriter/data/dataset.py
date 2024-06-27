@@ -187,7 +187,7 @@ class UniDataset(Dataset): #inherits the torch Class
         x = interpolate(to_tensor(x).unsqueeze(0), size=(self.height, int(self.height * x.size[0] / x.size[1])), mode='bilinear')
         x = (255*x.squeeze(0).permute(1, 2, 0).numpy()).astype(np.uint8)
         x = Image.fromarray(x, mode=self.channels)
-        return x, self.convert_label(label) #function that gets the label and applies transformation (returns a tuple)
+        return x, self.convert_label(label)#[::-1] #function that gets the label and applies transformation (returns a tuple)
 
     @property
     def has_labels(self):

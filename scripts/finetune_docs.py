@@ -5,10 +5,10 @@ import PIL
 import torch
 
 from tqdm import tqdm
-from os.path import dirname, abspath, join
+from os.path import dirname, abspath, join, isfile
 from collections import defaultdict
 from finetune_utils import check_patch, plot_sprites, make_optimizer_conf, get_parser
-from finetune_script import finetune
+from finetune_scripts import finetune
 
 LIB_PATH = join(dirname(dirname(abspath(__file__))))
 sys.path.append(LIB_PATH)
