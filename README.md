@@ -12,7 +12,7 @@ Research Institute: [IRHT](), (https://www.irht.cnrs.fr/), _Institut de Recherch
 Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/7el7mv8c27ggda1jvdxih/datasets.zip?rlkey=32c1yw6t59hitlruzd05aus74&st=tgaa0kg5&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/h1q7j3uhy1pv5y97q5nhw/demo.zip?rlkey=77tm13evqqpidgli2gmqtb6fe&st=eoegk2vk&dl=0) in the parent folder. *MV: Update potentially with the latest links* 
 
 ### Inference 
-For minimal inference from pre-trained models and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing))
+For minimal inference from pre-trained models and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)]([[https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing)))
 
 
 ### Paper figures :bar_chart:
