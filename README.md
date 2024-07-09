@@ -9,11 +9,13 @@ Research Institute: [IRHT](), (https://www.irht.cnrs.fr/), _Institut de Recherch
 
 
 ### Datasets and Models :inbox_tray: for Southern and Northern _Textualis_ 📜
-Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/cwrfg1hr6uv5t5fvponjq/datasets.zip?rlkey=hhkxm58z32r9kq159xr1jc9xi&st=q1xms5t9&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/ig09bcl5v0bm8e0h9we1k/runs.zip?rlkey=zfffwvp4w4m1ssqb8w6qqy55u&st=z6izmb9i&dl=0) in the parent folder.
+Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/7el7mv8c27ggda1jvdxih/datasets.zip?rlkey=32c1yw6t59hitlruzd05aus74&st=tgaa0kg5&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/h1q7j3uhy1pv5y97q5nhw/demo.zip?rlkey=77tm13evqqpidgli2gmqtb6fe&st=eoegk2vk&dl=0) in the parent folder. *MV: Update potentially with the latest links* 
 
-### Inference and Paper figures :bar_chart:
+### Inference 
 For minimal inference from pre-trained models and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing))
 
+
+### Paper figures :bar_chart:
 A notebook is also provided to produce the paper results and graphs:
  *MV: add the analysis and paper figures directly in the repo*
 
@@ -66,17 +68,17 @@ The annotation.json file should be a dictionary with entries of the form:
     "<image_id>": {
         "split": "train",                            # {"train", "val", "test"} - "val" is ignored in the unsupervised case.
         "label": "A beautiful calico cat."           # The text that corresponds to this line.
-        "script": "Times_New_Roman"                  # Corresponds to the script type of the image
+        "script": "Times_New_Roman"                  # Corresponds to the script type of the image (optional)
     },
 ```
 
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
 ### Filter/Normalize transcriptions :soap:
-
 We implement [choco-mufin](https://github.com/PonteIneptique/choco-mufin) when loading the dataset, using a disambiguation-table.csv to normalize or exclude characters from our annotations. This creates a consistent set of characters for analysis regardless of the annotation source. The current normalization suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic approach. For more details see [the associated article](https://openhumanitiesdata.metajnl.com/articles/10.5334/johd.97). You can modify this per your needs.
 
 Additionally, the data loader performs an [NFD normalization](https://fr.wikipedia.org/wiki/Normalisation_Unicode#NFD) when selecting the character vocabulary. This ensures that modifier characters, such as abbreviation tildes, are separated from the base letter and considered as separate characters when creating the prototypes.
+
 
 ## Training  :seedling: and Finetuning :herb:
 Training and model configure is performed though hydra.
@@ -103,7 +105,7 @@ python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_t
 
 
 ### Logging :chart_with_downwards_trend:
-Logging is done through wandb, and the link is provided directly upon training.
+Logging is done through wandb; the link to visualization is provided directly upon training.
 
 Alternatively, to visualize results with tensorboard run:
 
@@ -111,7 +113,7 @@ Alternatively, to visualize results with tensorboard run:
 tensorboard --logdir ./<run_dir>/
 ```
 
-### Citing :dizzy:
+### Citing :dizzy: *MV:Add this when uploaded on ArxiV*
 
 ```bibtex
 @misc{the-learnable-scriber,
