@@ -12,10 +12,10 @@ Research Institute: [IRHT](), (https://www.irht.cnrs.fr/), _Institut de Recherch
 Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/cwrfg1hr6uv5t5fvponjq/datasets.zip?rlkey=hhkxm58z32r9kq159xr1jc9xi&st=q1xms5t9&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/ig09bcl5v0bm8e0h9we1k/runs.zip?rlkey=zfffwvp4w4m1ssqb8w6qqy55u&st=z6izmb9i&dl=0) in the parent folder.
 
 ### Inference and Paper figures :bar_chart:
-For minimal inference from pre-trained models and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) (MV: in construction)
+For minimal inference from pre-trained models and plotting we provide a [standalone notebook. ![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing))
 
 A notebook is also provided to produce the paper results and graphs:
- *add a notebook solely for the graph figures*
+ *MV: add the analysis and paper figures directly in the repo*
 
 ## Install :rocket:
 ```shell
