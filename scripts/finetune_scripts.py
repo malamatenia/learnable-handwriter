@@ -64,12 +64,13 @@ def finetune(trainer, max_steps, log_every, save_sprites_dir, reconstructions_pa
 def run(args):
     os.makedirs(join(args.output_path, args.sprites_path), exist_ok=True)
     pbar = tqdm(args.script)
-    os.makedirs(join(args.output_path, 'models'), exist_ok=True)
+    
     for document in pbar:
         pbar.set_description(f"Processing {document}")
 
         # Skip if document already exists
-        if isfile(join(args.output_path, 'models', f'{document}.pth')):
+        document_path = join(args.output_path, document)
+        if isfile(join(document_path, 'model.pth')): # Check in document's directory
             print(f"Document {document} already exists. Skipping...")
             continue
 
@@ -92,18 +93,35 @@ def run(args):
             k['path'] = args.data_path
             k['annotation_path'] = args.annotation_file
 
-        check_patch(trainer, args.split, args, join(args.output_path, document))
+        check_patch(trainer, args.split, args, document_path)
         trainer.val_loader, trainer.test_loader = [], []
-        finetune(trainer, max_steps=args.max_steps, log_every=args.log_every, save_sprites_dir=join(args.output_path, document, args.sprites_path), save_model_dir=join(args.output_path, 'models', f'{document}.pth'), reconstructions_path=join(args.output_path, document, args.reconstructions_path), invert_sprites=args.invert_sprites, split=args.split)
-        plot_sprites(trainer, join(args.output_path, args.sprites_path), invert_sprites=args.invert_sprites, save_individual=False, grid_pref=document)
+        
+        # Update save_model_dir to save 'model.pth' in the document's directory
+        finetune(trainer, max_steps=args.max_steps, log_every=args.log_every, 
+                 save_sprites_dir=join(document_path, args.sprites_path), 
+                 save_model_dir=join(document_path, 'model.pth'), 
+                 reconstructions_path=join(document_path, args.reconstructions_path), 
+                 invert_sprites=args.invert_sprites, split=args.split)
+                 
+        plot_sprites(trainer, join(args.output_path, args.sprites_path), 
+                     invert_sprites=args.invert_sprites, save_individual=False, grid_pref=document)
         torch.cuda.empty_cache()
 
         try:
+            # Initialize png_list with baseline image
             png_list = [PIL.Image.open(join(args.output_path, 'baseline', f'grid-1l.png'))]
-            png_list += [PIL.Image.open(join(args.output_path, document, args.sprites_path, str(i).zfill(3), f'grid-1l.png')) for i in range(args.max_steps) if i%args.log_every == 0]
-            png_list[0].save(join(args.output_path, document, 'progress.gif'), save_all=True, duration=len(png_list)*0.1, append_images=png_list[1:])
+
+            # Append images for each step up to args.max_steps
+            for i in range(args.max_steps):
+                png_file = join(document_path, args.sprites_path, str(i).zfill(3), f'grid-1l.png')
+                if os.path.isfile(png_file):
+                    png_list.append(PIL.Image.open(png_file))
+
+            # Save the GIF using png_list
+            png_list[0].save(join(document_path, 'progress.gif'), save_all=True, duration=len(png_list) * 0.1, append_images=png_list[1:])
         except Exception as e:
             print(f"Error creating gif: {e}")
+
 
 if __name__ == "__main__":
     parser = get_parser('scripts')

@@ -8,7 +8,7 @@ from tqdm import tqdm
 from os.path import dirname, abspath, join, isfile
 from collections import defaultdict
 from finetune_utils import check_patch, plot_sprites, make_optimizer_conf, get_parser
-from finetune_scripts import finetune
+from scripts.finetune_scripts import finetune
 
 LIB_PATH = join(dirname(dirname(abspath(__file__))))
 sys.path.append(LIB_PATH)
@@ -46,7 +46,7 @@ def run(args):
     print(f"Filtered Documents size: {len(documents)}")
     os.makedirs(join(args.output_path, args.sprites_path), exist_ok=True)
     pbar = tqdm(documents)
-    os.makedirs(join(args.output_path, 'models'), exist_ok=True)
+    
     for document, split in documents:
         pbar.set_description(f"Processing {document}")
 
@@ -72,16 +72,33 @@ def run(args):
         # TODO uncomment this line when the patch is ready
         check_patch(trainer, split, args, join(args.output_path, document)) 
         trainer.val_loader, trainer.test_loader = [], []
-        finetune(trainer, max_steps=args.max_steps, log_every=args.log_every, save_sprites_dir=join(args.output_path, document, args.sprites_path), reconstructions_path=join(args.output_path, document, args.reconstructions_path), save_model_dir=join(args.output_path, 'models', f'{document}.pth'), invert_sprites=args.invert_sprites, split=split)
-        plot_sprites(trainer, join(args.output_path, args.sprites_path), invert_sprites=args.invert_sprites, save_individual=False, grid_pref=document)
+
+        # Update save_model_dir to save 'model.pth' in the document's directory
+        finetune(trainer, max_steps=args.max_steps, log_every=args.log_every, 
+                 save_sprites_dir=join(args.output_path, document, args.sprites_path), 
+                 reconstructions_path=join(args.output_path, document, args.reconstructions_path), 
+                 save_model_dir=join(args.output_path, document, 'model.pth'), 
+                 invert_sprites=args.invert_sprites, split=split)
+                 
+        plot_sprites(trainer, join(args.output_path, args.sprites_path), 
+                     invert_sprites=args.invert_sprites, save_individual=False, grid_pref=document)
         torch.cuda.empty_cache()
 
         try:
+            # Initialize png_list with baseline image
             png_list = [PIL.Image.open(join(args.output_path, 'baseline', f'grid-1l.png'))]
-            png_list += [PIL.Image.open(join(args.output_path, document, args.sprites_path, str(i).zfill(3), f'grid-1l.png')) for i in range(args.max_steps) if i%args.log_every == 0]
-            png_list[0].save(join(args.output_path, document, 'progress.gif'), save_all=True, duration=len(png_list)*0.1, append_images=png_list[1:])
+
+            # Append images for each step up to args.max_steps
+            for i in range(args.max_steps):
+                png_file = join(document_path, args.sprites_path, str(i).zfill(3), f'grid-1l.png')
+                if os.path.isfile(png_file):
+                    png_list.append(PIL.Image.open(png_file))
+
+            # Save the GIF using png_list
+            png_list[0].save(join(document_path, 'progress.gif'), save_all=True, duration=len(png_list) * 0.1, append_images=png_list[1:])
         except Exception as e:
             print(f"Error creating gif: {e}")
+
 
 
 if __name__ == "__main__":

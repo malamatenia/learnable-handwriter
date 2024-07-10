@@ -4,8 +4,7 @@
 /scripts/wandb/
 scripts/train.log
 /.vscode/
-/south-north-ft/
-/notebooks/
+/notebooks/results
 /finetune_runs/
 *-checkpoint.ipynb
 *.pyc
@@ -13,4 +12,3 @@ trainer.log
 .ipynb_checkpoints
 train.log
 /junicode-1.002/
-/evaluate-ssim-emd/
