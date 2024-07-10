@@ -1,15 +1,15 @@
 
 
 # The Learnable Scriber <br><sub>An adaptation of the [Learnable Typewriter](https://github.com/ysig/learnable-typewriter) for morphological script type analysis</sub>
-Github repository of the [An Interpretable Deep Learning Approach for Morphological Script Type Analysis] (add arXiv version of paper).  
-Authors: Malamatenia Vlachou, [Yannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://cv.hal.science/dominique-stutzmann), [Mathieu Aubry](http://imagine.enpc.fr/~aubrym/).  
-Research Institute: [IRHT](), (https://www.irht.cnrs.fr/), _Institut de Recherche et d'Histoire des Textes, CNRS_, [Imagine](https://imagine.enpc.fr/), _LIGM, Ecole des Ponts, Univ Gustave Eiffel, CNRS, Marne-la-Vallée, France_
+Github repository of the [An Interpretable Deep Learning Approach for Morphological Script Type Analysis](add arXiv version of the paper).  
+Authors: Malamatenia Vlachou Efstathiou, [Yannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://cv.hal.science/dominique-stutzmann), [Mathieu Aubry](http://imagine.enpc.fr/~aubrym/).  
+Research Institute: [IRHT], (https://www.irht.cnrs.fr/), _Institut de Recherche et d'Histoire des Textes, CNRS_, [Imagine](https://imagine.enpc.fr/), _LIGM, Ecole des Ponts, Univ Gustave Eiffel, CNRS, Marne-la-Vallée, France_
 
 ![LTW_graph.png](./.media/LTW_graph.png)
 
 
 ### Datasets and Models :inbox_tray: for Southern and Northern _Textualis_ 📜
-Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/7el7mv8c27ggda1jvdxih/datasets.zip?rlkey=32c1yw6t59hitlruzd05aus74&st=tgaa0kg5&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/h1q7j3uhy1pv5y97q5nhw/demo.zip?rlkey=77tm13evqqpidgli2gmqtb6fe&st=eoegk2vk&dl=0) in the parent folder. *MV: Update potentially with the latest links* 
+Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/4zc24m63hxhkh04y5xdi8/runs.zip?rlkey=6fr598xdiyh8a2yiiydxr7hw5&st=1svl5gpn&dl=0) in the parent folder.
 
 ### Inference 
 For minimal inference from pre-trained and finetuned models and plotting, we provide a standalone notebook. 
@@ -18,8 +18,7 @@ For minimal inference from pre-trained and finetuned models and plotting, we pro
 
 
 ### Paper figures :bar_chart:
-A notebook is also provided to produce the paper results and graphs:
- *MV: add the analysis and paper figures directly in the repo*
+A notebook demo.ipynb is also provided to reproduce the paper results and graphs with adjustable code for custom data.
 
 ## Install :rocket:
 ```shell
@@ -50,7 +49,7 @@ then a second one setting the hyperparameters:
 configs/<DATASET_ID>.yaml
 ...
 
-For its structure, see the config file provided for our experiment with additional information.
+For its structure, see the config file provided for our experiment with additional information as it's possible to exclude or restrict the train documents.
 
 ```
 
