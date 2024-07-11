@@ -115,7 +115,7 @@ tensorboard --logdir ./<run_dir>/
 ### Citing :dizzy:
 
 ```bibtex
-@misc{interpretable-script-analysis-iwcp2024,
+@misc{vlachou2024interpretable,
 	title = {An Interpretable Deep Learning Approach for Morphological Script Type Analysis},
 	author = {Vlachou-Efstathiou, Malamatenia and Siglidis, Ioannis and Stutzmann, Dominique, and Aubry, Mathieu},
 	publisher = {arXiv},
