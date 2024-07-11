@@ -114,10 +114,10 @@ Alternatively, to visualize results with tensorboard run:
 tensorboard --logdir ./<run_dir>/
 ```
 
-### Citing :dizzy: *MV:Add this when uploaded on ArxiV*
+### Citing :dizzy:
 
 ```bibtex
-@misc{the-learnable-scriber,
+@misc{interpretable-script-analysis-iwcp2024,
 	title = {An Interpretable Deep Learning Approach for Morphological Script Type Analysis},
 	author = {Vlachou-Efstathiou, Malamatenia and Siglidis, Ioannis and Stutzmann, Dominique, and Aubry, Mathieu},
 	publisher = {arXiv},
