@@ -1,4 +1,5 @@
-# An Interpretable Deep Learning Approach <br> for Morphological Script Type Analysis <sub> An adaptation of the [Learnable Typewriter](https://github.com/ysig/learnable-typewriter)</sub>
+# An Interpretable Deep Learning Approach <br> for Morphological Script Type Analysis 
+<sub> An adaptation of the [Learnable Typewriter](https://github.com/ysig/learnable-typewriter)</sub>
 Github repository of the [An Interpretable Deep Learning Approach for Morphological Script Type Analysis](https://imagine.enpc.fr/~m.vlachou-efstathiou/learnable-scriber/). 
 
 ![LTW_graph.png](./.media/LTW_graph.png)
@@ -24,7 +25,7 @@ A notebook demo.ipynb is also provided to reproduce the paper results and graphs
 
 To test the Learnable Scriber on a new dataset: 
 
-1. First create a config file for the dataset:
+1. Create a config file for the dataset:
 ```
 configs/dataset/<DATASET_ID>.yaml
 ...
@@ -35,7 +36,7 @@ DATASET-TAG:
   space: ' '                 # How the space is denoted in the annotation.
 ```
 
-2. then a second one in config/ setting the hyperparameters: 
+2. then a second one setting the hyperparameters: 
 ```
 configs/<DATASET_ID>.yaml
 ...
@@ -44,7 +45,7 @@ For its structure, see the config file provided for our experiment.
 
 ```
 
-3. Then create the dataset folder:
+3. Create the dataset folder:
 ```
 datasets/<DATASET-NAME>
 ├── annotation.json
