@@ -1,4 +1,4 @@
-# An Interpretable Deep Learning Approach <br> for Morphological Script Type Analysis <br> <p align="center"><sub> An adaptation of the Learnable Typewriter</sub> </p>
+# An Interpretable Deep Learning Approach for Morphological Script Type Analysis <br> <p align="center"><sub> An adaptation of the Learnable Typewriter</sub> </p>
 Github repository of the [An Interpretable Deep Learning Approach for Morphological Script Type Analysis](https://imagine.enpc.fr/~m.vlachou-efstathiou/learnable-scriber/). 
 
 ![LTW_graph.png](./.media/Derolez_table.png)
