@@ -22,6 +22,7 @@ In this case you'll need to download & extract only the [datasets.zip](https://w
 
 ### Train our reference model with:
 ```python
+
  python scripts/train.py iwcp_south_north.yaml 
 ```
 
@@ -29,11 +30,13 @@ In this case you'll need to download & extract only the [datasets.zip](https://w
 
 1. Our Northern and Southern _Textualis_ models with: 
 ```python
+
 python scripts/finetune_scripts.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites --script Northern_Textualis Southern Textualis -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split train
 ```
 
 2. Our document models with: 
 ```python
+
 python scripts/finetune_docs.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split all
 ```
 
@@ -42,6 +45,7 @@ python scripts/finetune_docs.py -i runs/iwcp_south_north/train/ -o runs/iwcp_sou
 To visualize results with tensorboard run:
 
 ```bash
+
 tensorboard --logdir ./<run_dir>/
 ```
 
@@ -62,10 +66,9 @@ DATASET-TAG:
 ```
 configs/<DATASET_ID>.yaml
 ...
+```
 
 For its structure, see the config file provided for our experiment.
-
-```
 
 3. Create the dataset folder:
 ```
@@ -88,22 +91,29 @@ The annotation.json file should be a dictionary with entries of the form:
 
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
-4. Train with:
+You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
+
+4. Train with
+```python
    
-   ```python
-python scripts/train.py <CONFIG_NAME>.yaml
+   python scripts/train.py <CONFIG_NAME>.yaml
 ```
-   
-6. Finetune
+
+5. Finetune
+
  - On a group of documents defined by their "script" type with:
 ```python
 
 python scripts/finetune_scripts.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites --script '<SCRIPT_NAME>' -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
 ```
+
 - On individual documents with:
-  ```python
+
+```python
+
 python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
-``` 
+```
+ 
    
 > [!NOTE]
 > To ensure a consistent set of characters regardless of the annotation source for our analysis, we implement internally [choco-mufin](https://github.com/PonteIneptique/choco-mufin), using a disambiguation-table.csv to normalize or exclude characters from the annotations. The current configuration suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic result.
