@@ -1,4 +1,4 @@
-# An Interpretable Deep Learning Approach for Morphological Script Type Analysis  <br> <sub> An adaptation of the [Learnable Typewriter](https://github.com/ysig/learnable-typewriter)</sub>
+# An Interpretable Deep Learning Approach for Morphological Script Type Analysis  <br> <sub> An adaptation of the Learnable Typewriter</sub>
 Github repository of the [An Interpretable Deep Learning Approach for Morphological Script Type Analysis](https://imagine.enpc.fr/~m.vlachou-efstathiou/learnable-scriber/). 
 
 ![LTW_graph.png](./.media/LTW_graph.png)
@@ -17,7 +17,7 @@ Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e
 For minimal inference on pre-trained and finetuned models, we provide a [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) notebook, available also as [inference.ipynb](https://github.com/malamatenia/learnable-scriber/blob/8aba90fd46f350d3c0ebfd14b4c7229428efb56c/inference.ipynb).
 
 ### Paper figures
-A notebook [demo.ipynb](https://github.com/malamatenia/learnable-scriber/blob/580ec0695ab427601e2b7808d8901ca5e6dbd740/demo.ipynb) is also provided to reproduce the paper results and graphs.
+A [demo.ipynb](https://github.com/malamatenia/learnable-scriber/blob/580ec0695ab427601e2b7808d8901ca5e6dbd740/demo.ipynb) notebook is provided to reproduce the paper results and graphs.
 
 
 ## Try it yourself 
@@ -96,7 +96,7 @@ To visualize results with tensorboard run:
 tensorboard --logdir ./<run_dir>/
 ```
 
-### Citing
+### Cite us
 
 ```bibtex
 @misc{vlachou2024interpretable,
@@ -110,6 +110,21 @@ tensorboard --logdir ./<run_dir>/
 	copyright = {Creative Commons Attribution 4.0 International}
 }
 ```
+
+and for the original [Learnable Typewriter](https://imagine.enpc.fr/~siglidii/learnable-typewriter/) work:
+```bibtex
+@misc{the-learnable-typewriter,
+	title = {The Learnable Typewriter: A Generative Approach to Text Line Analysis},
+	author = {Siglidis, Ioannis and Gonthier, Nicolas and Gaubil, Julien and Monnier, Tom and Aubry, Mathieu},
+	publisher = {arXiv},
+	year = {2023},
+	url = {https://arxiv.org/abs/2302.01660},
+	keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},
+	doi = {10.48550/ARXIV.2302.01660},
+	copyright = {Creative Commons Attribution 4.0 International}
+}
+```
+
 
 ## Acknowledgements
 This study was supported by the CNRS through MITI and the 80|Prime program (CrEMe Caractérisation des écritures médiévales) , and by the European Research Council (ERC project DISCOVER, number 101076028). We thank Ségolène Albouy, Raphaël Baena, Sonat Baltacı, Syrine Kalleli, and Elliot Vincent for valuable feedback on the paper.
