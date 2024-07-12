@@ -89,6 +89,7 @@ The annotation.json file should be a dictionary with entries of the form:
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
 4. Train with:
+   
    ```python
 python scripts/train.py <CONFIG_NAME>.yaml
 ```
