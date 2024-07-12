@@ -15,15 +15,14 @@ python -m pip install -r requirements.txt
 ### Our Datasets and Models 
 Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/4zc24m63hxhkh04y5xdi8/runs.zip?rlkey=6fr598xdiyh8a2yiiydxr7hw5&st=1svl5gpn&dl=0) in the parent folder.
 
-For minimal inference from pre-trained and finetuned models and plotting, we provide a standalone notebook. 
+For minimal inference on pre-trained and finetuned models, we provide a standalone notebook. 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing)
 
 ### Paper figures
-A notebook demo.ipynb is also provided to reproduce the paper results and graphs with adjustable code for custom data.
+A notebook ' demo.ipynb ' is also provided to reproduce the paper results and graphs.
+
 
 ## Try it yourself 
-
-To test the Learnable Scriber on a new dataset: 
 
 1. Create a config file for the dataset:
 ```
@@ -66,7 +65,7 @@ The annotation.json file should be a dictionary with entries of the form:
 
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
-Note: To ensure a consistent set of characters regardless of the annotation source for our analysis, we implement internally [choco-mufin](https://github.com/PonteIneptique/choco-mufin), using a disambiguation-table.csv to normalize or exclude characters from the annotations. The current configuration suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic result.
+> [!NOTE] To ensure a consistent set of characters regardless of the annotation source for our analysis, we implement internally [choco-mufin](https://github.com/PonteIneptique/choco-mufin), using a disambiguation-table.csv to normalize or exclude characters from the annotations. The current configuration suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic result.
 
 
 ## How to run: 
