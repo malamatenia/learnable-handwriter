@@ -111,19 +111,8 @@ tensorboard --logdir ./<run_dir>/
 }
 ```
 
-and for the original [Learnable Typewriter](https://imagine.enpc.fr/~siglidii/learnable-typewriter/) work:
-```bibtex
-@misc{the-learnable-typewriter,
-	title = {The Learnable Typewriter: A Generative Approach to Text Line Analysis},
-	author = {Siglidis, Ioannis and Gonthier, Nicolas and Gaubil, Julien and Monnier, Tom and Aubry, Mathieu},
-	publisher = {arXiv},
-	year = {2023},
-	url = {https://arxiv.org/abs/2302.01660},
-	keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},
-	doi = {10.48550/ARXIV.2302.01660},
-	copyright = {Creative Commons Attribution 4.0 International}
-}
-```
+Check out also: 
+-[Siglidis, I., Gonthier, N., Gaubil, J., Monnier, T., & Aubry, M. (2023). The Learnable Typewriter: A Generative Approach to Text Analysis.](https://imagine.enpc.fr/~siglidii/learnable-typewriter/)
 
 
 ## Acknowledgements
