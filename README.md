@@ -4,6 +4,10 @@ Github repository of the [An Interpretable Deep Learning Approach for Morphologi
 ![LTW_graph.png](./.media/LTW_graph.png)
 
 
+- For minimal inference on pre-trained and finetuned models without having to install, we provide a [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) notebook, available also as [inference.ipynb](https://github.com/malamatenia/learnable-scriber/blob/8aba90fd46f350d3c0ebfd14b4c7229428efb56c/inference.ipynb).
+
+- A [demo.ipynb](https://github.com/malamatenia/learnable-scriber/blob/580ec0695ab427601e2b7808d8901ca5e6dbd740/demo.ipynb) notebook is provided to reproduce the paper results and graphs. You'll need to download & extract [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/4zc24m63hxhkh04y5xdi8/runs.zip?rlkey=6fr598xdiyh8a2yiiydxr7hw5&st=1svl5gpn&dl=0) in the base folder.
+
 ## Install
 ```shell
 conda create --name ltw pytorch==1.9.1 torchvision==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
@@ -11,16 +15,36 @@ conda activate ltw
 python -m pip install -r requirements.txt
 ```
 
-### Our Datasets and Models 
-Download & extract [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/4zc24m63hxhkh04y5xdi8/runs.zip?rlkey=6fr598xdiyh8a2yiiydxr7hw5&st=1svl5gpn&dl=0) in the base folder.
+## Run it from scratch on our dataset 
 
-For minimal inference on pre-trained and finetuned models, we provide a [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) notebook, available also as [inference.ipynb](https://github.com/malamatenia/learnable-scriber/blob/8aba90fd46f350d3c0ebfd14b4c7229428efb56c/inference.ipynb).
+In this case you'll need to download & extract only the [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0).
 
-### Paper figures
-A [demo.ipynb](https://github.com/malamatenia/learnable-scriber/blob/580ec0695ab427601e2b7808d8901ca5e6dbd740/demo.ipynb) notebook is provided to reproduce the paper results and graphs.
+### Train our reference model with:
+```python
+ python scripts/train.py iwcp_south_north.yaml 
+```
 
+### Finetune 
 
-## Try it yourself 
+1. Our Northern and Southern _Textualis_ models with: 
+```python
+python scripts/finetune_scripts.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites --script Northern_Textualis Southern Textualis -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split train
+```
+
+2. Our document models with: 
+```python
+python scripts/finetune_docs.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split all
+```
+
+## Logging
+
+To visualize results with tensorboard run:
+
+```bash
+tensorboard --logdir ./<run_dir>/
+```
+
+## Run it on your data 
 
 1. Create a config file for the dataset:
 ```
@@ -63,38 +87,24 @@ The annotation.json file should be a dictionary with entries of the form:
 
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
-> [!NOTE]
-> To ensure a consistent set of characters regardless of the annotation source for our analysis, we implement internally [choco-mufin](https://github.com/PonteIneptique/choco-mufin), using a disambiguation-table.csv to normalize or exclude characters from the annotations. The current configuration suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic result.
-
-
-## How to run: 
-
-### Training a model
-```python
+4. Train with:
+   ```python
 python scripts/train.py <CONFIG_NAME>.yaml
 ```
-
-### Finetuning a model
-
-- A group of documents defined by the "script" type:
+   
+6. Finetune
+ - On a group of documents defined by their "script" type with:
 ```python
 
 python scripts/finetune_scripts.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites --script '<SCRIPT_NAME>' -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
 ```
-
-- individual documents in a dataset with: 
-```python
+- On individual documents with:
+  ```python
 python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
-```
-
-
-### Logging
-
-To visualize results with tensorboard run:
-
-```bash
-tensorboard --logdir ./<run_dir>/
-```
+``` 
+   
+> [!NOTE]
+> To ensure a consistent set of characters regardless of the annotation source for our analysis, we implement internally [choco-mufin](https://github.com/PonteIneptique/choco-mufin), using a disambiguation-table.csv to normalize or exclude characters from the annotations. The current configuration suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic result.
 
 ### Cite us
 
@@ -111,8 +121,7 @@ tensorboard --logdir ./<run_dir>/
 }
 ```
 
-Check out also: 
--[Siglidis, I., Gonthier, N., Gaubil, J., Monnier, T., & Aubry, M. (2023). The Learnable Typewriter: A Generative Approach to Text Analysis.](https://imagine.enpc.fr/~siglidii/learnable-typewriter/)
+Check out also: [Siglidis, I., Gonthier, N., Gaubil, J., Monnier, T., & Aubry, M. (2023). The Learnable Typewriter: A Generative Approach to Text Analysis.](https://imagine.enpc.fr/~siglidii/learnable-typewriter/)
 
 
 ## Acknowledgements
