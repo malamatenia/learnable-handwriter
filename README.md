@@ -1,4 +1,4 @@
-# <p align="center">[An Interpretable Deep Learning Approach for Morphological Script Type Analysis] <p> <p align="center"><sub> An adaptation of the Learnable Typewriter</sub> </p>
+# <p align="center">An Interpretable Deep Learning Approach for Morphological Script Type Analysis <p> <p align="center"><sub> An adaptation of the Learnable Typewriter</sub> </p>
 Authors: Malamatenia Vlachou Efstathiou, [Ioannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://www.irht.cnrs.fr/fr/annuaire/stutzmann-dominique) and [Mathieu Aubry](https://imagine.enpc.fr/~aubrym/) <br>
 Research Institutes: [Imagine](https://imagine-lab.enpc.fr/), LIGM, Ecole des Ponts, Univ Gustave Eiffel, CNRS, and [IRHT](https://www.irht.cnrs.fr/fr/recherche/les-themes-et-sections/paleographie-latine), CNRS, Paris, Île-de-France, France
 
