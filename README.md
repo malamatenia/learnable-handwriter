@@ -10,11 +10,14 @@ Research Institutes: [Imagine](https://imagine-lab.enpc.fr/), LIGM, Ecole des Po
 - A [demo.ipynb](https://github.com/malamatenia/learnable-scriber/blob/580ec0695ab427601e2b7808d8901ca5e6dbd740/demo.ipynb) notebook is provided to reproduce the paper results and graphs. You'll need to download & extract [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/4zc24m63hxhkh04y5xdi8/runs.zip?rlkey=6fr598xdiyh8a2yiiydxr7hw5&st=1svl5gpn&dl=0) in the base folder first.
 
 ## Install
+
 ```shell
 conda create --name ltw pytorch==1.9.1 torchvision==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
 conda activate ltw
 python -m pip install -r requirements.txt
 ```
+
+
 
 ## Run it from scratch on our dataset 
 
@@ -40,6 +43,8 @@ python scripts/finetune_scripts.py -i runs/iwcp_south_north/train/ -o runs/iwcp_
 python scripts/finetune_docs.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split all
 ```
 
+
+
 ## Logging
 
 To visualize results with tensorboard run:
@@ -48,6 +53,8 @@ To visualize results with tensorboard run:
 
 tensorboard --logdir ./<run_dir>/
 ```
+
+
 
 ## Run it on your data 
 
@@ -114,11 +121,10 @@ python scripts/finetune_scripts.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode 
 python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_theta --max_steps <int> --invert_sprites -a <DATASET_PATH>/annotation.json -d <DATASET_PATH> --split <train or all>
 ```
  
-   
 > [!NOTE]
 > To ensure a consistent set of characters regardless of the annotation source for our analysis, we implement internally [choco-mufin](https://github.com/PonteIneptique/choco-mufin), using a disambiguation-table.csv to normalize or exclude characters from the annotations. The current configuration suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic result.
 
-### Cite us
+## Cite us
 
 ```bibtex
 @misc{vlachou2024interpretable,
