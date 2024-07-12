@@ -64,7 +64,8 @@ The annotation.json file should be a dictionary with entries of the form:
 
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
-> [!NOTE] To ensure a consistent set of characters regardless of the annotation source for our analysis, we implement internally [choco-mufin](https://github.com/PonteIneptique/choco-mufin), using a disambiguation-table.csv to normalize or exclude characters from the annotations. The current configuration suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic result.
+> [!NOTE]
+> To ensure a consistent set of characters regardless of the annotation source for our analysis, we implement internally [choco-mufin](https://github.com/PonteIneptique/choco-mufin), using a disambiguation-table.csv to normalize or exclude characters from the annotations. The current configuration suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic result.
 
 
 ## How to run: 
