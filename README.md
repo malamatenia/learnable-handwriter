@@ -12,7 +12,7 @@ Research Institutes: [Imagine](https://imagine-lab.enpc.fr/), LIGM, Ecole des Po
 ## Install
 
 ```shell
-conda create --name ltw pytorch==1.9.1 torchvision==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
+conda create --name ltw pytorch==2.1.1 torchvision==0.15.0 cudatoolkit=11.3 -c pytorch -c conda-forge
 conda activate ltw
 python -m pip install -r requirements.txt
 ```
