@@ -15,5 +15,5 @@ setup(name='learnable_typewriter',
       python_requires='>=3.5,',
       install_requires=INSTALL_REQUIRES,
       packages=find_packages(),
-      scripts=['scripts/train.py', 'scripts/eval.py'],
+      scripts=['scripts/train.py', 'scripts/eval.py','scripts/finetune_scripts.py','scripts/finetune_docs.py'],
      )
