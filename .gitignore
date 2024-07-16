@@ -4,7 +4,7 @@
 /scripts/wandb/
 scripts/train.log
 /.vscode/
-/notebooks/results
+/notebooks/
 /finetune_runs/
 *-checkpoint.ipynb
 *.pyc
@@ -12,3 +12,6 @@ trainer.log
 .ipynb_checkpoints
 train.log
 /junicode-1.002/
+key
+key_pub/
+/paper_results/
