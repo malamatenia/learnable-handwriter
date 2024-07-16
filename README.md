@@ -12,7 +12,7 @@ Research Institutes: [Imagine](https://imagine-lab.enpc.fr/), LIGM, Ecole des Po
 ## Install
 
 ```shell
-conda create --name ltw pytorch==1.9.1 torchvision==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
+conda create --name ltw pytorch==2.1.1 torchvision==0.15.0 cudatoolkit=11.3 -c pytorch -c conda-forge
 conda activate ltw
 python -m pip install -r requirements.txt
 ```
@@ -34,7 +34,7 @@ In this case you'll need to download & extract only the [datasets.zip](https://w
 1. Our Northern and Southern _Textualis_ models with: 
 ```python
 
-python scripts/finetune_scripts.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites --script Northern_Textualis Southern Textualis -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split train
+python scripts/finetune_scripts.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites --script Northern_Textualis Southern_Textualis -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split train
 ```
 
 2. Our document models with: 
@@ -42,19 +42,6 @@ python scripts/finetune_scripts.py -i runs/iwcp_south_north/train/ -o runs/iwcp_
 
 python scripts/finetune_docs.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split all
 ```
-
-
-
-## Logging
-
-To visualize results with tensorboard run:
-
-```bash
-
-tensorboard --logdir ./<run_dir>/
-```
-
-
 
 ## Run it on your data 
 
@@ -102,7 +89,7 @@ You can completely ignore the annotation.json file in the case of unsupervised t
 
 4. Train with
 ```python
-   
+
    python scripts/train.py <CONFIG_NAME>.yaml
 ```
 
