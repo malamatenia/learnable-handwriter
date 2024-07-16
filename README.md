@@ -34,7 +34,7 @@ In this case you'll need to download & extract only the [datasets.zip](https://w
 1. Our Northern and Southern _Textualis_ models with: 
 ```python
 
-python scripts/finetune_scripts.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites --script Northern_Textualis Southern Textualis -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split train
+python scripts/finetune_scripts.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites --script Northern_Textualis Southern_Textualis -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split train
 ```
 
 2. Our document models with: 
