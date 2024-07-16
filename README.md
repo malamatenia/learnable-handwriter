@@ -89,7 +89,7 @@ You can completely ignore the annotation.json file in the case of unsupervised t
 
 4. Train with
 ```python
-   
+
    python scripts/train.py <CONFIG_NAME>.yaml
 ```
 
