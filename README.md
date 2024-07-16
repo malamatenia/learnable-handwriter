@@ -5,7 +5,7 @@ Research Institutes: [Imagine](https://imagine-lab.enpc.fr/), LIGM, Ecole des Po
 ![LTW_graph.png](./.media/Derolez_table.png)
 
 
-- For minimal inference on pre-trained and finetuned models without having to install, we provide a [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) notebook, available also as [inference.ipynb](https://github.com/malamatenia/learnable-scriber/blob/8aba90fd46f350d3c0ebfd14b4c7229428efb56c/inference.ipynb).
+- For minimal inference on pre-trained and finetuned models without having to install, we provide a standalone Colab[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11_CGvoXvpulKNEDsRN9MdBS35NvNz5l7?usp=sharing) notebook, available also as [inference.ipynb](https://github.com/malamatenia/learnable-scriber/blob/8aba90fd46f350d3c0ebfd14b4c7229428efb56c/inference.ipynb).
 
 - A [demo.ipynb](https://github.com/malamatenia/learnable-scriber/blob/580ec0695ab427601e2b7808d8901ca5e6dbd740/demo.ipynb) notebook is provided to reproduce the paper results and graphs. You'll need to download & extract [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/4zc24m63hxhkh04y5xdi8/runs.zip?rlkey=6fr598xdiyh8a2yiiydxr7hw5&st=1svl5gpn&dl=0) in the base folder first.
 
