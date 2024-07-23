@@ -1,6 +1,4 @@
-# <p align="center">An Interpretable Deep Learning Approach for Morphological Script Type Analysis <p> <p align="center"><sub> An adaptation of the Learnable Typewriter</sub> </p>
-Authors: Malamatenia Vlachou Efstathiou, [Ioannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://www.irht.cnrs.fr/fr/annuaire/stutzmann-dominique) and [Mathieu Aubry](https://imagine.enpc.fr/~aubrym/) <br>
-Research Institutes: [Imagine](https://imagine-lab.enpc.fr/), LIGM, Ecole des Ponts, Univ Gustave Eiffel, CNRS, and [IRHT](https://www.irht.cnrs.fr/fr/recherche/les-themes-et-sections/paleographie-latine), CNRS, Paris, Île-de-France, France
+# <p align="center">An Interpretable Deep Learning Approach for Morphological Script Type Analysis (IWCP 2024)</p> <p> <sub> Malamatenia Vlachou Efstathiou, [Ioannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://www.irht.cnrs.fr/fr/annuaire/stutzmann-dominique) and [Mathieu Aubry](https://imagine.enpc.fr/~aubrym/) </sub> </p>
 
 ![LTW_graph.png](./.media/Derolez_table.png)
 
@@ -115,15 +113,11 @@ python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_t
 
 ```bibtex
 @misc{vlachou2024interpretable,
-	title = {An Interpretable Deep Learning Approach for Morphological Script Type Analysis},
-	author = {Vlachou-Efstathiou, Malamatenia and Siglidis, Ioannis and Stutzmann, Dominique, and Aubry, Mathieu},
-	publisher = {arXiv},
-	year = {2024},
-	url = {},
-	keywords = {Computer Vision and Pattern Recognition (cs.CV), Digital Palaeography, Document Analysis},
-	doi = {},
-	copyright = {Creative Commons Attribution 4.0 International}
-}
+title = {An Interpretable Deep Learning Approach for Morphological Script Type Analysis},
+author = {Vlachou-Efstathiou, Malamatenia, and Siglidis, Ioannis and Stutzann, Dominique and Aubry, Mathieu},
+publisher = {IWCP},
+year = {2024},
+url = {https://arxiv.org/}}
 ```
 
 Check out also: [Siglidis, I., Gonthier, N., Gaubil, J., Monnier, T., & Aubry, M. (2023). The Learnable Typewriter: A Generative Approach to Text Analysis.](https://imagine.enpc.fr/~siglidii/learnable-typewriter/)
