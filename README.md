@@ -137,7 +137,7 @@ python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_t
 ```bibtex
 @misc{vlachou2024interpretable,
     title = {An Interpretable Deep Learning Approach for Morphological Script Type Analysis},
-    author = {Vlachou-Efstathiou, Malamatenia and Siglidis, Ioannis and Stutzann, Dominique and Aubry, Mathieu},
+    author = {Vlachou-Efstathiou, Malamatenia and Siglidis, Ioannis and Stutzmann, Dominique and Aubry, Mathieu},
     publisher = {Document Analysis and Recognition--ICDAR 2021 Workshops: Athens, Greece, August 30--September 4, 2023, Proceedings},
     year = {2024},
     organization={Springer}, 
