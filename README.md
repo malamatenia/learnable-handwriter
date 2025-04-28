@@ -1,4 +1,5 @@
-# <p align="center">An Interpretable Deep Learning Approach for Morphological Script Type Analysis (IWCP 2024)</p> <p align="center"> https://learnable-handwriter.github.io/ </p> <sub> [Malamatenia Vlachou Efstathiou](https://malamatenia.github.io/), [Ioannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://www.irht.cnrs.fr/fr/annuaire/stutzmann-dominique) and [Mathieu Aubry](https://imagine.enpc.fr/~aubrym/) </sub> </p>
+# <p align="center">An Interpretable Deep Learning Approach for Morphological Script Type Analysis (IWCP 2024) [![DOI](https://zenodo.org/badge/625272114.svg)](https://doi.org/10.5281/zenodo.15297804)
+ </p> <p align="center"> https://learnable-handwriter.github.io/ </p> <sub> [Malamatenia Vlachou Efstathiou](https://malamatenia.github.io/), [Ioannis Siglidis](https://imagine.enpc.fr/~siglidii/), [Dominique Stutzmann](https://www.irht.cnrs.fr/fr/annuaire/stutzmann-dominique) and [Mathieu Aubry](https://imagine.enpc.fr/~aubrym/) </sub> </p>
 
 ![LTW_graph.png](./.media/Derolez_table.png)
 
