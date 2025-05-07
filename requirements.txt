@@ -11,3 +11,5 @@ coloredlogs
 tensorboard
 colorcet
 opencv-python
+wandb
+albumentations
