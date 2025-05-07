@@ -11,7 +11,7 @@
  <details> 
  <summary>Install</summary>
 
-   If you're using conda: 
+   If you're using a linux machine with conda: 
    ```shell
     conda env create -f environment.yml
     conda activate lhr
