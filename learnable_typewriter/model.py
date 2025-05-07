@@ -66,7 +66,10 @@ class Model(Dataset):
 
         assert model_path.exists(), print(f'Couldn\'t find {model_path}')
 
-        checkpoint = torch.load(model_path, map_location=self.device)
+        if torch.__version__ >= '2.1':
+                checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
+        else:
+            checkpoint = torch.load(model_path, map_location=self.device)
         self.start_epoch = 1
 
         ########### CORE ##########
