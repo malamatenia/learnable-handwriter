@@ -11,13 +11,20 @@
  <details> 
  <summary>Install</summary>
 
-   
+   If you're using conda: 
    ```shell
-    conda create --name ltw pytorch==2.1.1 torchvision==0.15.0 cudatoolkit=11.3 -c pytorch -c conda-forge
-    conda activate ltw
-    python -m pip install -r requirements.txt
-
+    conda env create -f environment.yml
+    conda activate lhr
    ```
+
+If you're using pip: 
+
+   ```shell
+  conda create --name lhr python=3.10 pytorch=2.1.1 torchvision=0.16.1 pytorch-cuda=11.7 -c pytorch -c nvidia -c conda-forge
+  conda activate lhr
+  python -m pip install -r requirements.txt
+    ```
+
  </details>
 
 ## Run it from scratch on our dataset
