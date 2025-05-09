@@ -10,19 +10,16 @@
 ## Getting Started
  <details> 
  <summary>Install</summary>
-
-   If you're using a linux machine with conda and GPU: 
+1. Create Environment
    ```shell
-    conda env create -f environment.yml
-    conda activate lhr
+   conda env create --name lhr python=3.10
+   conda activate lhr
    ```
-
- If you're using pip: 
+2. Install pytorch: https://pytorch.org/get-started/locally/
+3. If you're using pip:
  ```shell
-conda create --name lhr python=3.10 pytorch=2.1.1 torchvision=0.16.1 pytorch-cuda=11.7 -c pytorch -c nvidia -c conda-forge
-conda activate lhr
-python -m pip install -r requirements.txt
-  ```
+    python -m pip install -r requirements.txt
+ ```
  </details>
 
 ## Run it from scratch on our dataset
