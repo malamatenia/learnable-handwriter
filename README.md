@@ -8,38 +8,38 @@
 - A [figures.ipynb](https://github.com/malamatenia/learnable-scriber/blob/a3afc60a3b8d9dcd7dca99b0e8c547301124bfd5/figures.ipynb) notebook is provided to reproduce the paper results and graphs. You'll need to download & extract [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/4zc24m63hxhkh04y5xdi8/runs.zip?rlkey=6fr598xdiyh8a2yiiydxr7hw5&st=1svl5gpn&dl=0) in the base folder first.
 
 ## Getting Started
- <summary>Install</summary>  
+### Install
   
-1. Create Environment
+1. Create a conda environment:
    ```shell
    conda env create --name lhr python=3.10
    conda activate lhr
    ```
-2. Install pytorch: https://pytorch.org/get-started/locally/
+2. [Install pytorch.](https://pytorch.org/get-started/locally/)
 3. If you're using pip:
- ```shell
+    ```shell
     python -m pip install -r requirements.txt
- ```
+    ```
 
 ## Run it from scratch on our dataset
- <summary>Train</summary> 
+ ### Train
 
    In this case you'll need to download & extract only the [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0).
 
    ### Train our reference model with:
    ```python
 
-    python scripts/train.py iwcp_south_north.yaml 
+   python scripts/train.py iwcp_south_north.yaml 
    ```
- <summary>Finetune</summary>  
+ ### Finetune
 
-   ### 1. Our Northern and Southern _Textualis_ models with: 
+   ### 1. Northern and Southern _Textualis_ models with: 
    ```python
 
    python scripts/finetune_scripts.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites --script Northern_Textualis Southern_Textualis -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split train
    ```
 
-   ### 2. Our document models with: 
+   ### 2. document models with: 
    ```python
 
    python scripts/finetune_docs.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split all
@@ -47,7 +47,7 @@
 
 
 ## Run it on your data
-<summary>Create your config files:</summary> 
+### Create your config files:
 
 ### 1. Create a config file for the dataset:
 ```
@@ -68,7 +68,7 @@ configs/<DATASET_ID>.yaml
 
 For its structure, see the config file provided for our experiment.
 
-<summary>Create your dataset folder:</summary>
+### Create your dataset folder:
 
  
  ### 3. Create the dataset folder:
@@ -92,7 +92,7 @@ The annotation.json file should be a dictionary with entries of the form:
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
 
-<summary>Train and finetune</summary>
+### Train and finetune
 
  
 ### 4. Train with
