@@ -8,8 +8,8 @@
 - A [figures.ipynb](https://github.com/malamatenia/learnable-scriber/blob/a3afc60a3b8d9dcd7dca99b0e8c547301124bfd5/figures.ipynb) notebook is provided to reproduce the paper results and graphs. You'll need to download & extract [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0) and [runs.zip](https://www.dropbox.com/scl/fi/4zc24m63hxhkh04y5xdi8/runs.zip?rlkey=6fr598xdiyh8a2yiiydxr7hw5&st=1svl5gpn&dl=0) in the base folder first.
 
 ## Getting Started
- <details> 
- <summary>Install</summary>
+ <summary>Install</summary>  
+  
 1. Create Environment
    ```shell
    conda env create --name lhr python=3.10
@@ -20,10 +20,8 @@
  ```shell
     python -m pip install -r requirements.txt
  ```
- </details>
 
 ## Run it from scratch on our dataset
- <details>
  <summary>Train</summary> 
 
    In this case you'll need to download & extract only the [datasets.zip](https://www.dropbox.com/scl/fi/tfz79kwxoe4vp5e4npmxa/datasets.zip?rlkey=2820mu0bddpnax6alx04bglzu&st=caxfyfsp&dl=0).
@@ -33,8 +31,6 @@
 
     python scripts/train.py iwcp_south_north.yaml 
    ```
-</details>
- <details>   
  <summary>Finetune</summary>  
 
    ### 1. Our Northern and Southern _Textualis_ models with: 
@@ -49,10 +45,8 @@
    python scripts/finetune_docs.py -i runs/iwcp_south_north/train/ -o runs/iwcp_south_north/finetune/ --mode g_theta --max_steps 2500 --invert_sprites -a datasets/iwcp_south_north/annotation.json -d datasets/iwcp_south_north/ --split all
    ```
 
-</details>
 
 ## Run it on your data
-<details>
 <summary>Create your config files:</summary> 
 
 ### 1. Create a config file for the dataset:
@@ -74,9 +68,6 @@ configs/<DATASET_ID>.yaml
 
 For its structure, see the config file provided for our experiment.
 
-</details>
-
-<details>
 <summary>Create your dataset folder:</summary>
 
  
@@ -89,7 +80,6 @@ datasets/<DATASET-NAME>
   └── ...
 ```
 
-
 The annotation.json file should be a dictionary with entries of the form:
 ```
     "<image_id>": {
@@ -99,12 +89,9 @@ The annotation.json file should be a dictionary with entries of the form:
     },
 ```
 
-
 You can completely ignore the annotation.json file in the case of unsupervised training without evaluation.
 
-</details>
 
-<details>
 <summary>Train and finetune</summary>
 
  
@@ -131,8 +118,6 @@ python scripts/finetune_docs.py -i runs/<MODEL_PATH> -o <OUTPUT_PATH> --mode g_t
  
 > [!NOTE]
 > To ensure a consistent set of characters regardless of the annotation source for our analysis, we implement internally [choco-mufin](https://github.com/PonteIneptique/choco-mufin), using a disambiguation-table.csv to normalize or exclude characters from the annotations. The current configuration suppresses allographs and edition signs (e.g., modern punctuation) for a graphetic result.
-
-</details>
 
 ## Cite us
 
