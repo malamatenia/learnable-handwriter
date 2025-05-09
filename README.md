@@ -12,7 +12,7 @@
   
 1. Create a conda environment:
    ```shell
-   conda env create --name lhr python=3.10
+   conda create --name lhr python=3.10
    conda activate lhr
    ```
 2. [Install pytorch.](https://pytorch.org/get-started/locally/)
