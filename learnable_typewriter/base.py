@@ -99,7 +99,14 @@ class Base(object):
 
     def __init_device__(self):
         device_id = self.cfg['training'].get('device')
-        self.device = torch.device((f"cuda:{device_id}" if (device_id not in [None, 'cpu']) else 'cpu'))
+        if device_id is None:
+            self.device = torch.device('cpu')
+        elif device_id == 'mps':
+            self.device = torch.device('mps')
+        else:
+            if isinstance(device_id, str):
+                device_id = int(device_id)
+            self.device = torch.device(f"cuda:{device_id}")
         self.log(f"device: {self.device}")
 
     def log(self, message, eval=None):
