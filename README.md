@@ -11,6 +11,8 @@
 
 ## Getting Started
 ### Install
+
+After cloning the repository and entering the base folder:
   
 1. Create a conda environment:
    ```shell
