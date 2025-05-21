@@ -13,3 +13,5 @@ colorcet
 opencv-python
 wandb
 albumentations
+rootutils
+ipykernel
