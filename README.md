@@ -12,6 +12,9 @@
 ## Getting Started
 ### Install
 
+> [!NOTE]
+> macOS is not supported due to compatibility issues with the available PyTorch version (affine transforms are not fully implemented or optimized in the macOS build). We recommend running the code on a Linux system (locally or on a server) with CUDA support. For training, the use of a GPU is strongly advised. 
+
 After cloning the repository and entering the base folder:
   
 1. Create a conda environment:
