@@ -1,11 +1,8 @@
 import numpy as np
 import pandas as pd
 import os
-import json
 import shutil
 from pathlib import Path
-import rootutils
-import sys 
 
 import cv2
 import PIL
@@ -491,9 +488,16 @@ def plot_letter_graphs(
             colors.append('red' if script == 'Southern_Textualis' else 'blue')
             markers.append('o' if split == 'train' else 'x')
 
+
         for x, y, color, marker, codename in zip(all_l2_diff_south, all_l2_diff_north, colors, markers, codenames):
             ax.scatter(x, y, c=color, marker=marker, s=70)
             ax.annotate(codename, (x, y), textcoords="offset points", xytext=(2, 2), ha='left', va='bottom', fontsize=12)
+            
+        # Set these once per subplot, not per point
+        ax.set_ylabel('Distance to ST prototype', fontsize=20)
+        ax.set_xlabel('Distance to NT prototype', fontsize=20)
+        ax.grid(True)
+        ax.margins(0.3)
 
         # Axis formatting
         ax.plot([0, 10], [0, 10], linestyle='--', color='gray')
